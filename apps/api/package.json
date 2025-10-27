@@ -1,0 +1,47 @@
+{
+	"name": "api",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./lib/*": "./src/lib/*"
+	},
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"test:coverage": "vitest --coverage",
+		"test:ui": "vitest --ui",
+		"type-check": "tsc --noEmit",
+		"db:generate": "prisma generate",
+		"db:migrate": "prisma migrate dev",
+		"db:migrate:deploy": "prisma migrate deploy",
+		"db:push": "prisma db push",
+		"db:studio": "prisma studio",
+		"db:seed": "tsx prisma/seed.ts"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.19.5",
+		"@hono/zod-validator": "^0.7.4",
+		"@prisma/client": "^6.17.1",
+		"better-auth": "^1.3.28",
+		"dotenv": "^17.2.3",
+		"hono": "^4.10.1",
+		"socket.io": "^4.8.1",
+		"zod": "^3.24.1"
+	},
+	"devDependencies": {
+		"@types/node": "^22.0.0",
+		"@vitest/ui": "^4.0.3",
+		"prisma": "^6.17.1",
+		"tsx": "^4.19.0",
+		"typescript": "^5.9.3",
+		"vite-tsconfig-paths": "^5.1.4",
+		"vitest": "^4.0.3"
+	}
+}

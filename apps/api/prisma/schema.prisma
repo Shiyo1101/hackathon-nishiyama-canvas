@@ -1,0 +1,270 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+enum UserRole {
+  user
+  admin
+}
+
+enum AnimalStatus {
+  active
+  inactive
+}
+
+enum ContentType {
+  news
+  animal
+  text
+  image
+  user_image
+}
+
+enum UsageType {
+  background
+  content
+}
+
+enum ReportReason {
+  inappropriate_image
+  spam
+  copyright
+  other
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  resolved
+  rejected
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  image         String?
+  role          UserRole  @default(user)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sessions        Session[]
+  accounts        Account[]
+  signage         Signage?
+  userImages      UserImage[]
+  reportsMade     Report[]    @relation("ReporterUser")
+  reportsReviewed Report[]    @relation("ReviewerUser")
+
+  @@index([email])
+  @@index([role])
+  @@index([createdAt(sort: Desc)])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([providerId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+model Signage {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  title        String
+  description  String?
+  layoutConfig Json     @default("{}")
+  isPublic     Boolean  @default(false)
+  slug         String   @unique
+  viewCount    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  signageContents SignageContent[]
+  reports         Report[]
+
+  @@index([userId])
+  @@index([slug])
+  @@index([isPublic])
+  @@index([viewCount(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("signages")
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  summary     String?
+  category    String?
+  imageUrl    String?
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  signageContents SignageContent[]
+
+  @@index([publishedAt(sort: Desc)])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
+  @@map("news")
+}
+
+model Animal {
+  id          String       @id @default(cuid())
+  name        String
+  species     String
+  description String?
+  habitat     String?
+  diet        String?
+  status      AnimalStatus @default(active)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  animalImages    AnimalImage[]
+  signageContents SignageContent[]
+
+  @@index([name])
+  @@index([species])
+  @@index([status])
+  @@map("animals")
+}
+
+model AnimalImage {
+  id           String   @id @default(cuid())
+  animalId     String
+  imageUrl     String
+  thumbnailUrl String?
+  caption      String?
+  isFeatured   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  animal          Animal           @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  signageContents SignageContent[]
+
+  @@index([animalId])
+  @@index([isFeatured])
+  @@index([createdAt(sort: Desc)])
+  @@map("animal_images")
+}
+
+model SignageContent {
+  id          String      @id @default(cuid())
+  signageId   String
+  contentType ContentType
+  contentId   String?
+  position    Int         @default(0)
+  settings    Json        @default("{}")
+  createdAt   DateTime    @default(now())
+
+  signage     Signage      @relation(fields: [signageId], references: [id], onDelete: Cascade)
+  news        News?        @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_news_fkey")
+  animal      Animal?      @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_animal_fkey")
+  animalImage AnimalImage? @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_animal_image_fkey")
+  userImage   UserImage?   @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_user_image_fkey")
+
+  @@index([signageId])
+  @@index([contentType])
+  @@index([contentId])
+  @@index([signageId, position])
+  @@map("signage_contents")
+}
+
+model UserImage {
+  id           String    @id @default(cuid())
+  userId       String
+  imageUrl     String
+  thumbnailUrl String?
+  fileSize     Int
+  mimeType     String
+  usageType    UsageType
+  createdAt    DateTime  @default(now())
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  signageContents SignageContent[]
+
+  @@index([userId])
+  @@index([usageType])
+  @@index([createdAt(sort: Desc)])
+  @@map("user_images")
+}
+
+model Report {
+  id             String       @id @default(cuid())
+  signageId      String
+  reporterUserId String?
+  reason         ReportReason
+  description    String?
+  status         ReportStatus @default(pending)
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  signage      Signage @relation(fields: [signageId], references: [id], onDelete: Cascade)
+  reporterUser User?   @relation("ReporterUser", fields: [reporterUserId], references: [id], onDelete: SetNull)
+  reviewer     User?   @relation("ReviewerUser", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([signageId])
+  @@index([reporterUserId])
+  @@index([status])
+  @@index([reviewedBy])
+  @@index([createdAt(sort: Desc)])
+  @@map("reports")
+}

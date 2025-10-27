@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"biomejs.biome",
+		"prisma.prisma",
+		"bradlc.vscode-tailwindcss",
+		"ms-playwright.playwright",
+		"vitest.explorer"
+	]
+}
