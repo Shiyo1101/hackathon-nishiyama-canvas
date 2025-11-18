@@ -19,7 +19,7 @@ out/
 *.pem
 *.log
 *.lock
-!bun.lockb
+!pnpm-lock.yaml
 
 # Debug
 npm-debug.log*
@@ -62,4 +62,11 @@ prisma/dev.db
 tmp/
 temp/
 
+# AI, MCP
+# docs/
+# CLAUDE.md
+# .serena/
+# .claude/
+
 .turbo/
+node_modules

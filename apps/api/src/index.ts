@@ -1,11 +1,41 @@
+/**
+ * Nishiyama Canvas API
+ * エントリーポイント
+ */
+import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { prisma } from "./lib/db";
+import { createAnimalsRoutes } from "./modules/animals";
 import { auth } from "./modules/auth";
-import { publicSignageRoutes, signageRoutes } from "./modules/signage";
+import { createNewsRoutes } from "./modules/news";
+import {
+  createFavoriteRoutes,
+  createPublicSignageRoutes,
+  createSignageHandlers,
+  createSignageRoutes,
+} from "./modules/signage";
+import { createSignageRepository } from "./modules/signage/signage.repository";
+import { createSignageService } from "./modules/signage/signage.service";
+import { createThemeRoutes } from "./modules/theme";
+import { createUploadRoutes } from "./modules/upload";
+import { createWeatherRoutes } from "./modules/weather";
 
+/**
+ * 型定義のエクスポート
+ * フロントエンド（apps/web）から @api でインポート可能
+ */
+export * from "./modules/animals";
 export * from "./modules/auth";
+export * from "./modules/news";
+export * from "./modules/signage";
+export * from "./modules/upload";
+export * from "./types";
 
+/**
+ * 環境変数
+ */
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 const PORT = Number(process.env.PORT) || 8000;
 
@@ -32,7 +62,6 @@ const app = new Hono()
       timestamp: new Date().toISOString(),
     }),
   )
-  // ルート
   .get("/", (c) =>
     c.json({
       message: "Nishiyama Canvas API",
@@ -41,31 +70,58 @@ const app = new Hono()
   );
 
 /**
- * APIルート（Hono RPC用）
+ * サービス初期化
  */
-const apiRoutes = new Hono()
-  .route("/signages", signageRoutes)
-  .route("/public/signages", publicSignageRoutes);
+const signageRepository = createSignageRepository(prisma);
+const signageService = createSignageService(signageRepository);
+const signageHandlers = createSignageHandlers(signageService);
 
 /**
- * ルートをマウント
+ * ルート定義
+ * Hono RPCの型推論を保持するため、直接ルートを定義
  */
-app.route("/api", apiRoutes);
+const signageRoutes = createSignageRoutes(signageHandlers);
+const publicSignageRoutes = createPublicSignageRoutes(signageHandlers);
+const favoriteRoutes = createFavoriteRoutes(signageHandlers);
+const animalsRoutes = createAnimalsRoutes();
+const newsRoutes = createNewsRoutes();
+const themeRoutes = createThemeRoutes();
+const weatherRoutes = createWeatherRoutes();
+const uploadRoutes = createUploadRoutes();
 
-// Better Auth は独自のハンドラーを使用
+const routes = new Hono()
+  .route("/signages", signageRoutes)
+  .route("/favorites", favoriteRoutes)
+  .route("/animals", animalsRoutes)
+  .route("/news", newsRoutes)
+  .route("/themes", themeRoutes)
+  .route("/weather", weatherRoutes)
+  .route("/upload", uploadRoutes)
+  .route("/public", publicSignageRoutes);
+
+/**
+ * APIルートをマウント
+ */
+app.route("/api", routes);
+
+/**
+ * Better Auth ハンドラー
+ */
 app.all("/api/auth/*", (c) => auth.handler(c.req.raw));
 
 /**
- * サーバー起動
+ * 型エクスポート（Hono RPC用）
  */
-console.log(`🚀 Server is running on http://localhost:${PORT}`);
-
-serve({
-  fetch: app.fetch,
-  port: PORT,
-});
+export type AppType = typeof routes;
 
 /**
- * Hono RPC用の型エクスポート
+ * サーバー起動（本番環境以外）
  */
-export type AppType = typeof apiRoutes;
+if (process.env.NODE_ENV !== "production") {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+
+  serve({
+    fetch: app.fetch,
+    port: PORT,
+  });
+}

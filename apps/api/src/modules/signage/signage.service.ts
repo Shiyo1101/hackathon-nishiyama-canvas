@@ -1,6 +1,6 @@
 import type { Signage } from "../../lib/db";
-import type { CreateSignageInput, UpdateSignageInput } from "../../types";
 import type { SignageRepository } from "./signage.repository";
+import type { CreateSignageInput, UpdateSignageInput } from "./signage.routes";
 
 export type SignageService = {
   getUserSignage: (userId: string) => Promise<Signage | null>;
@@ -9,6 +9,10 @@ export type SignageService = {
   updatePublishStatus: (userId: string, signageId: string, isPublic: boolean) => Promise<Signage>;
   deleteSignage: (userId: string, signageId: string) => Promise<void>;
   getPublicSignage: (slug: string) => Promise<Signage>;
+  getPopularSignages: (limit: number) => Promise<Signage[]>;
+  getFavoriteSignages: (userId: string, limit?: number) => Promise<Signage[]>;
+  addFavorite: (userId: string, signageId: string) => Promise<{ id: string }>;
+  removeFavorite: (userId: string, signageId: string) => Promise<void>;
 };
 
 const checkOwnership = async (repository: SignageRepository, userId: string, signageId: string) => {
@@ -31,9 +35,13 @@ export const createSignageService = (repository: SignageRepository): SignageServ
   },
 
   createSignage: async (userId: string, input: CreateSignageInput): Promise<Signage> => {
-    const existingSignage = await repository.findByUserId(userId);
-    if (existingSignage) {
-      throw new Error("すでにサイネージが存在します");
+    // Phase 1: 無料プランでは1ユーザー1サイネージ制限
+    // TODO: Phase 2で有料プラン実装時は UserPlan テーブルを参照してlimitを動的に取得
+    const MAX_SIGNAGES_FREE_PLAN = 1;
+    const signageCount = await repository.countByUserId(userId);
+
+    if (signageCount >= MAX_SIGNAGES_FREE_PLAN) {
+      throw new Error("無料プランでは1つまでサイネージを作成できます");
     }
 
     const existingSlug = await repository.findBySlug(input.slug);
@@ -76,5 +84,40 @@ export const createSignageService = (repository: SignageRepository): SignageServ
 
     await repository.incrementViewCount(signage.id);
     return signage;
+  },
+
+  getPopularSignages: async (limit: number): Promise<Signage[]> => {
+    return repository.findPopularPublicSignages(limit);
+  },
+
+  getFavoriteSignages: async (userId: string, limit?: number): Promise<Signage[]> => {
+    return repository.findFavoritesByUserId(userId, limit);
+  },
+
+  addFavorite: async (userId: string, signageId: string): Promise<{ id: string }> => {
+    const signage = await repository.findById(signageId);
+    if (!signage) {
+      throw new Error("サイネージが見つかりません");
+    }
+
+    if (!signage.isPublic) {
+      throw new Error("非公開のサイネージはお気に入りに追加できません");
+    }
+
+    const alreadyFavorited = await repository.isFavorited(userId, signageId);
+    if (alreadyFavorited) {
+      throw new Error("すでにお気に入りに追加されています");
+    }
+
+    return repository.addFavorite(userId, signageId);
+  },
+
+  removeFavorite: async (userId: string, signageId: string): Promise<void> => {
+    const isFavorited = await repository.isFavorited(userId, signageId);
+    if (!isFavorited) {
+      throw new Error("お気に入りに登録されていません");
+    }
+
+    return repository.removeFavorite(userId, signageId);
   },
 });

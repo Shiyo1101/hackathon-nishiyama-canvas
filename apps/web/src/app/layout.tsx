@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
-import { Kiwi_Maru, Mochiy_Pop_One } from "next/font/google";
+import { Fira_Code, Lora, Nunito } from "next/font/google";
 import "./globals.css";
 
-const kiwiMaru = Kiwi_Maru({
-  weight: ["300", "400", "500"],
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-kiwi-maru",
-  preload: true,
+  variable: "--font-sans",
   display: "swap",
 });
 
-const mochiyPopOne = Mochiy_Pop_One({
-  weight: "400",
+const lora = Lora({
   subsets: ["latin"],
-  variable: "--font-mochiy-pop-one",
-  preload: true,
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "にしやまきゃんばす！",
+  title: "にしやまきゃんばす!",
   description:
     "福井県鯖江市「西山動物園」のレッサーパンダをテーマにしたデジタルサイネージ作成・管理アプリケーション",
 };
@@ -30,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${kiwiMaru.variable} ${mochiyPopOne.variable}`}>
-      <body className={`${kiwiMaru.className} antialiased`}>{children}</body>
+    <html lang="ja" className={`${nunito.variable} ${lora.variable} ${firaCode.variable}`}>
+      <body className={`${nunito.className} antialiased`}>{children}</body>
     </html>
   );
 }

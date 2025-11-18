@@ -1,6 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
 
 const prisma = new PrismaClient();
+
+// パスワードをハッシュ化する関数
+async function hashPassword(password: string): Promise<string> {
+  return hash(password, 10);
+}
 
 async function main(): Promise<void> {
   console.log("シードデータの投入を開始します...");
@@ -30,6 +36,77 @@ async function main(): Promise<void> {
     },
   });
   console.log("✓ テストユーザーを作成しました:", testUser.email);
+
+  // テストユーザーのパスワード付きアカウント作成
+  const hashedPassword = await hashPassword("password");
+  const existingAccount = await prisma.account.findFirst({
+    where: {
+      userId: testUser.id,
+      providerId: "credential",
+    },
+  });
+
+  if (!existingAccount) {
+    await prisma.account.create({
+      data: {
+        userId: testUser.id,
+        accountId: testUser.id,
+        providerId: "credential",
+        password: hashedPassword,
+      },
+    });
+    console.log("✓ テストユーザーのパスワードを設定しました");
+  } else {
+    console.log("✓ テストユーザーのパスワードは既に設定済みです");
+  }
+
+  // デフォルトテーマ作成
+  const defaultTheme = await prisma.theme.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000001" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000001",
+      name: "デフォルトテーマ",
+      fontFamily: "Noto Sans JP",
+      primaryColor: "#FF6B6B",
+      secondaryColor: "#4ECDC4",
+      backgroundColor: "#FFFFFF",
+      isDefault: true,
+    },
+  });
+  console.log("✓ デフォルトテーマを作成しました:", defaultTheme.name);
+
+  // 追加テーマ（レッサーパンダカラー）
+  const redPandaTheme = await prisma.theme.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000002" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000002",
+      name: "レッサーパンダテーマ",
+      fontFamily: "Noto Sans JP",
+      primaryColor: "#D2691E",
+      secondaryColor: "#FF8C00",
+      backgroundColor: "#FFF5E6",
+      isDefault: false,
+    },
+  });
+  console.log("✓ レッサーパンダテーマを作成しました:", redPandaTheme.name);
+
+  // 追加テーマ（ナチュラルグリーン）
+  const natureTheme = await prisma.theme.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000003" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000003",
+      name: "ナチュラルグリーンテーマ",
+      fontFamily: "Noto Sans JP",
+      primaryColor: "#228B22",
+      secondaryColor: "#90EE90",
+      backgroundColor: "#F0FFF0",
+      isDefault: false,
+    },
+  });
+  console.log("✓ ナチュラルグリーンテーマを作成しました:", natureTheme.name);
 
   // レッサーパンダ情報作成
   const redPanda = await prisma.animal.upsert({
@@ -115,40 +192,202 @@ async function main(): Promise<void> {
   }
   console.log(`✓ ${newsItems.length}件のサンプルニュースを作成しました`);
 
-  // テストユーザーのサンプルサイネージ作成
-  const sampleSignage = await prisma.signage.create({
-    data: {
+  // テストユーザー2作成
+  const testUser2 = await prisma.user.upsert({
+    where: { email: "user2@example.com" },
+    update: {},
+    create: {
+      email: "user2@example.com",
+      name: "テストユーザー2",
+      role: "user",
+      emailVerified: true,
+    },
+  });
+  console.log("✓ テストユーザー2を作成しました:", testUser2.email);
+
+  // テストユーザー2のパスワード設定
+  const existingAccount2 = await prisma.account.findFirst({
+    where: { userId: testUser2.id, providerId: "credential" },
+  });
+  if (!existingAccount2) {
+    await prisma.account.create({
+      data: {
+        userId: testUser2.id,
+        accountId: testUser2.id,
+        providerId: "credential",
+        password: await hashPassword("password"),
+      },
+    });
+    console.log("✓ テストユーザー2のパスワードを設定しました");
+  }
+
+  // テストユーザー3作成
+  const testUser3 = await prisma.user.upsert({
+    where: { email: "user3@example.com" },
+    update: {},
+    create: {
+      email: "user3@example.com",
+      name: "テストユーザー3",
+      role: "user",
+      emailVerified: true,
+    },
+  });
+  console.log("✓ テストユーザー3を作成しました:", testUser3.email);
+
+  // テストユーザー3のパスワード設定
+  const existingAccount3 = await prisma.account.findFirst({
+    where: { userId: testUser3.id, providerId: "credential" },
+  });
+  if (!existingAccount3) {
+    await prisma.account.create({
+      data: {
+        userId: testUser3.id,
+        accountId: testUser3.id,
+        providerId: "credential",
+        password: await hashPassword("password"),
+      },
+    });
+    console.log("✓ テストユーザー3のパスワードを設定しました");
+  }
+
+  // サンプルサイネージ作成（複数のユーザー分）
+  const signageData = [
+    {
       userId: testUser.id,
       title: "レッサーパンダ応援サイネージ",
       description: "西山動物園のかわいいレッサーパンダたちを紹介します！",
-      slug: `user-${testUser.id}`,
+      slug: `test-user-signage`,
       isPublic: true,
-      layoutConfig: {
-        template_id: "template-01",
-        background: {
-          type: "color",
-          color: "#fff5e6",
-        },
-        grid: {
-          columns: 12,
-          rows: 8,
-        },
-        items: [
-          {
-            id: "item-1",
-            type: "news",
-            position: { x: 0, y: 0, w: 6, h: 4 },
-          },
-          {
-            id: "item-2",
-            type: "animal",
-            position: { x: 6, y: 0, w: 6, h: 4 },
-          },
-        ],
-      },
+      thumbnailUrl: "https://placehold.co/1200x630/orange/white?text=Red+Panda+Signage",
+      viewCount: 120,
+      likeCount: 45,
     },
-  });
-  console.log("✓ サンプルサイネージを作成しました:", sampleSignage.title);
+    {
+      userId: testUser2.id,
+      title: "レッサーパンダの魅力を伝える",
+      description: "可愛いレッサーパンダの日常をお届けします",
+      slug: `popular-red-panda`,
+      isPublic: true,
+      thumbnailUrl: "https://placehold.co/1200x630/brown/white?text=Popular+Signage",
+      viewCount: 89,
+      likeCount: 32,
+    },
+    {
+      userId: testUser3.id,
+      title: "西山動物園の魅力",
+      description: "レッサーパンダと一緒に楽しむ動物園ライフ",
+      slug: `zoo-life`,
+      isPublic: true,
+      thumbnailUrl: "https://placehold.co/1200x630/green/white?text=Zoo+Life",
+      viewCount: 67,
+      likeCount: 28,
+    },
+  ];
+
+  const createdSignages = [];
+  for (const data of signageData) {
+    const signage = await prisma.signage.upsert({
+      where: { slug: data.slug },
+      update: {},
+      create: {
+        ...data,
+        layoutConfig: {
+          template_id: "template-01",
+          theme: {
+            id: defaultTheme.id,
+            name: defaultTheme.name,
+            fontFamily: defaultTheme.fontFamily,
+            primaryColor: defaultTheme.primaryColor,
+            secondaryColor: defaultTheme.secondaryColor,
+            backgroundColor: defaultTheme.backgroundColor,
+          },
+          background: {
+            type: "color",
+            color: "#fff5e6",
+          },
+          grid: {
+            columns: 12,
+            rows: 8,
+          },
+          weather: {
+            enabled: true,
+            location: {
+              type: "manual",
+              latitude: 35.9447,
+              longitude: 136.1847,
+              cityName: "鯖江市",
+            },
+          },
+          items: [
+            {
+              id: "item-1",
+              type: "news",
+              position: { x: 0, y: 0, w: 6, h: 4 },
+            },
+            {
+              id: "item-2",
+              type: "animal",
+              position: { x: 6, y: 0, w: 6, h: 4 },
+            },
+            {
+              id: "item-3",
+              type: "weather",
+              position: { x: 0, y: 4, w: 4, h: 2 },
+            },
+          ],
+        },
+      },
+    });
+    createdSignages.push(signage);
+    console.log("✓ サイネージを作成しました:", signage.title);
+  }
+
+  // お気に入りデータの作成
+  const favoriteData = [
+    {
+      userId: testUser.id,
+      signageId: createdSignages[1].id, // testUser2のサイネージをお気に入り
+    },
+    {
+      userId: testUser.id,
+      signageId: createdSignages[2].id, // testUser3のサイネージをお気に入り
+    },
+    {
+      userId: testUser2.id,
+      signageId: createdSignages[0].id, // testUserのサイネージをお気に入り
+    },
+    {
+      userId: testUser3.id,
+      signageId: createdSignages[0].id, // testUserのサイネージをお気に入り
+    },
+  ];
+
+  for (const favData of favoriteData) {
+    const existingFavorite = await prisma.favorite.findUnique({
+      where: {
+        userId_signageId: {
+          userId: favData.userId,
+          signageId: favData.signageId,
+        },
+      },
+    });
+
+    if (!existingFavorite) {
+      await prisma.favorite.create({
+        data: favData,
+      });
+      // お気に入り追加時にlikeCountをインクリメント
+      await prisma.signage.update({
+        where: { id: favData.signageId },
+        data: {
+          likeCount: {
+            increment: 1,
+          },
+        },
+      });
+    }
+  }
+  console.log(`✓ ${favoriteData.length}件のお気に入りデータを作成しました`);
 
   console.log("\n✅ シードデータの投入が完了しました！");
 }

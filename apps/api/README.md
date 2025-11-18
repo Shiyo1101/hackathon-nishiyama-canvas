@@ -4,7 +4,7 @@
 
 ## Tech Stack
 
-- **Runtime**: Bun
+- **Runtime**: Node.js
 - **Framework**: Hono (with RPC support)
 - **ORM**: Prisma
 - **Database**: PostgreSQL

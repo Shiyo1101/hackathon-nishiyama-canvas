@@ -11,8 +11,12 @@
 		"build:web": "turbo run build --filter=web",
 		"build:api": "turbo run build --filter=api",
 		"test": "turbo run test",
-		"test:watch": "turbo run test -- --watch",
-		"test:coverage": "turbo run test -- --coverage",
+		"test:watch": "turbo run test:watch",
+		"test:coverage": "turbo run test:coverage",
+		"test:ui": "pnpm --filter=web test:ui",
+		"e2e": "pnpm --filter=web e2e",
+		"e2e:ui": "pnpm --filter=web e2e:ui",
+		"e2e:debug": "pnpm --filter=web e2e:debug",
 		"type-check": "turbo run type-check",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
@@ -34,5 +38,5 @@
 		"node": ">=20.0.0",
 		"pnpm": ">=9.0.0"
 	},
-	"packageManager": "pnpm@9.15.4"
+	"packageManager": "pnpm@10.20.0"
 }

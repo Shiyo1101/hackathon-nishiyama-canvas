@@ -4,11 +4,11 @@ import { auth } from "./auth.instance";
 
 export const authMiddleware = async (c: Context, next: Next): Promise<void> => {
   try {
-    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    const sessionData = await auth.api.getSession({ headers: c.req.raw.headers });
 
-    if (session) {
-      c.set("user", session.user);
-      c.set("session", session.session);
+    if (sessionData?.user && sessionData?.session) {
+      c.set("user", sessionData.user);
+      c.set("session", sessionData.session);
     } else {
       c.set("user", null);
       c.set("session", null);

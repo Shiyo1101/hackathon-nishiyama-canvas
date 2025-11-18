@@ -1,11 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "ES2017",
-		"lib": [
-			"dom",
-			"dom.iterable",
-			"esnext"
-		],
+		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": true,
 		"skipLibCheck": true,
 		"strict": true,
@@ -24,21 +20,16 @@
 		],
 		"tsBuildInfoFile": "tsconfig.tsbuildinfo",
 		"paths": {
-			"@/*": [
-				"./src/*"
-			],
-			"@api/*": [
-				"../api/src/*"
-			]
+			"@/*": ["./src/*"],
+			"@api": ["../api/dist/index.d.ts"],
+			"@api/*": ["../api/dist/*"]
 		}
 	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts"
+	"references": [
+		{
+			"path": "../api"
+		}
 	],
-	"exclude": [
-		"node_modules"
-	]
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+	"exclude": ["node_modules"]
 }
