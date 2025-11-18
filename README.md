@@ -211,19 +211,6 @@ pnpm --filter=api test           # APIのテストのみ
 pnpm --filter=api db:migrate     # APIのマイグレーションのみ
 ```
 
-## 📚 ドキュメント
-
-プロジェクトの詳細なドキュメントは`docs/`ディレクトリにあります：
-
-- [要件定義書](./docs/requirements.md)
-- [アーキテクチャ設計書](./docs/architecture.md)
-- [データベーススキーマ設計書](./docs/database-schema.md)
-- [API仕様書](./docs/api-specification.md)
-- [開発ガイドライン](./docs/development-guidelines.md)
-- [TDD開発ガイドライン](./docs/tdd-guidelines.md)
-- [セットアップガイド](./docs/setup-guide.md)
-- [実装タスクリスト](./docs/implementation-tasks.md)
-
 ## 🎯 開発の進め方
 
 ### 1. タスク確認
