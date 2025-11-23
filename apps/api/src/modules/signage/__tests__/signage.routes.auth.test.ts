@@ -4,7 +4,10 @@
 
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "../../../lib/db";
-import { signageRoutes } from "../signage.routes";
+import { createSignageHandlers } from "../signage.handlers";
+import { createSignageRepository } from "../signage.repository";
+import { createSignageRoutes } from "../signage.routes";
+import { createSignageService } from "../signage.service";
 
 // ユニークなslugを生成するヘルパー関数
 const generateUniqueSlug = (prefix: string): string => {
@@ -30,6 +33,7 @@ vi.mock("../../auth/auth.instance", () => ({
 describe("サイネージAPI 認証統合テスト", () => {
   let testUserId: string;
   let testUserEmail: string;
+  let signageRoutes: ReturnType<typeof createSignageRoutes>;
 
   beforeAll(async () => {
     // テスト用ユーザー作成
@@ -43,6 +47,12 @@ describe("サイネージAPI 認証統合テスト", () => {
       },
     });
     testUserId = user.id;
+
+    // サイネージルートのセットアップ
+    const repository = createSignageRepository(prisma);
+    const service = createSignageService(repository);
+    const handlers = createSignageHandlers(service, repository);
+    signageRoutes = createSignageRoutes(handlers);
   });
 
   beforeEach(() => {

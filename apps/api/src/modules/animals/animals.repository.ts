@@ -21,6 +21,51 @@ export type AnimalImageFilter = {
 /**
  * 動物Repositoryの型定義
  */
+/**
+ * 動物作成入力
+ */
+export type CreateAnimalInput = {
+  name: string;
+  species: string;
+  description?: string;
+  habitat?: string;
+  diet?: string;
+  status?: AnimalStatus;
+};
+
+/**
+ * 動物更新入力
+ */
+export type UpdateAnimalInput = {
+  name?: string;
+  species?: string;
+  description?: string;
+  habitat?: string;
+  diet?: string;
+  status?: AnimalStatus;
+};
+
+/**
+ * 動物画像作成入力
+ */
+export type CreateAnimalImageInput = {
+  animalId: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  isFeatured?: boolean;
+};
+
+/**
+ * 動物画像更新入力
+ */
+export type UpdateAnimalImageInput = {
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  isFeatured?: boolean;
+};
+
 export type AnimalsRepository = {
   /**
    * 動物一覧を取得
@@ -51,6 +96,36 @@ export type AnimalsRepository = {
    * IDで動物画像を取得
    */
   findAnimalImageById: (id: string) => Promise<AnimalImage | null>;
+
+  /**
+   * 動物を作成（管理者のみ）
+   */
+  createAnimal: (input: CreateAnimalInput) => Promise<Animal>;
+
+  /**
+   * 動物を更新（管理者のみ）
+   */
+  updateAnimal: (id: string, input: UpdateAnimalInput) => Promise<Animal>;
+
+  /**
+   * 動物を削除（管理者のみ）
+   */
+  deleteAnimal: (id: string) => Promise<void>;
+
+  /**
+   * 動物画像を作成（管理者のみ）
+   */
+  createAnimalImage: (input: CreateAnimalImageInput) => Promise<AnimalImage>;
+
+  /**
+   * 動物画像を更新（管理者のみ）
+   */
+  updateAnimalImage: (id: string, input: UpdateAnimalImageInput) => Promise<AnimalImage>;
+
+  /**
+   * 動物画像を削除（管理者のみ）
+   */
+  deleteAnimalImage: (id: string) => Promise<void>;
 };
 
 /**
@@ -108,6 +183,69 @@ export const createAnimalsRepository = (prisma: PrismaClient): AnimalsRepository
 
   findAnimalImageById: async (id: string): Promise<AnimalImage | null> => {
     return prisma.animalImage.findUnique({
+      where: { id },
+    });
+  },
+
+  createAnimal: async (input: CreateAnimalInput): Promise<Animal> => {
+    return prisma.animal.create({
+      data: {
+        name: input.name,
+        species: input.species,
+        description: input.description,
+        habitat: input.habitat,
+        diet: input.diet,
+        status: input.status ?? "active",
+      },
+    });
+  },
+
+  updateAnimal: async (id: string, input: UpdateAnimalInput): Promise<Animal> => {
+    return prisma.animal.update({
+      where: { id },
+      data: {
+        ...(input.name !== undefined && { name: input.name }),
+        ...(input.species !== undefined && { species: input.species }),
+        ...(input.description !== undefined && { description: input.description }),
+        ...(input.habitat !== undefined && { habitat: input.habitat }),
+        ...(input.diet !== undefined && { diet: input.diet }),
+        ...(input.status !== undefined && { status: input.status }),
+      },
+    });
+  },
+
+  deleteAnimal: async (id: string): Promise<void> => {
+    await prisma.animal.delete({
+      where: { id },
+    });
+  },
+
+  createAnimalImage: async (input: CreateAnimalImageInput): Promise<AnimalImage> => {
+    return prisma.animalImage.create({
+      data: {
+        animalId: input.animalId,
+        imageUrl: input.imageUrl,
+        thumbnailUrl: input.thumbnailUrl,
+        caption: input.caption,
+        isFeatured: input.isFeatured ?? false,
+      },
+    });
+  },
+
+  updateAnimalImage: async (id: string, input: UpdateAnimalImageInput): Promise<AnimalImage> => {
+    return prisma.animalImage.update({
+      where: { id },
+      data: {
+        ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
+        ...(input.thumbnailUrl !== undefined && { thumbnailUrl: input.thumbnailUrl }),
+        ...(input.caption !== undefined && { caption: input.caption }),
+        ...(input.isFeatured !== undefined && { isFeatured: input.isFeatured }),
+      },
+    });
+  },
+
+  deleteAnimalImage: async (id: string): Promise<void> => {
+    await prisma.animalImage.delete({
       where: { id },
     });
   },

@@ -9,6 +9,8 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.ts"],
     exclude: ["node_modules", "dist"],
+    // ファイル間の並列実行を無効化（データベーステストの競合を防ぐ）
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

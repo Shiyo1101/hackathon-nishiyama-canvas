@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,13 +29,18 @@ export const EmailPasswordLogin = () => {
       });
 
       if (result.error) {
-        setError(result.error.message || "Failed to login");
+        const errorMessage = result.error.message || "Failed to login";
+        setError(errorMessage);
+        toast.error(`ログインに失敗しました: ${errorMessage}`);
       } else {
+        toast.success("ログインしました");
         router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {
-      setError("Failed to login");
+      const errorMessage = "Failed to login";
+      setError(errorMessage);
+      toast.error(`ログインに失敗しました: ${errorMessage}`);
       console.error(err);
     } finally {
       setIsLoading(false);

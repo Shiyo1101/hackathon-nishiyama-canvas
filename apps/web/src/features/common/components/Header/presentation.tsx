@@ -1,9 +1,10 @@
 "use client";
 
 import type { User } from "@api";
-import { LogOutIcon, SettingsIcon } from "lucide-react";
+import { LogOutIcon, SettingsIcon, ShieldCheckIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,13 +15,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOutAction } from "../../actions/sign-out-action";
+import { authClient } from "@/lib/auth-client";
 
 type HeaderPresentationProps = {
   user: User | null;
 };
 
 export const HeaderPresentation = ({ user }: HeaderPresentationProps) => {
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/login");
+        },
+      },
+    });
+  };
+
   return (
     <header className="mx-auto w-full max-w-6xl px-8">
       <nav className="flex h-16 items-center justify-between border-b px-4">
@@ -51,11 +64,18 @@ export const HeaderPresentation = ({ user }: HeaderPresentationProps) => {
                   <p className="text-foreground text-xs">{user.role}</p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={async () => {
-                    await signOutAction();
-                  }}
-                >
+                {user.role === "admin" && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <ShieldCheckIcon className="mr-2 h-4 w-4" />
+                        管理者ページ
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOutIcon className="mr-2 h-4 w-4" />
                   ログアウト
                 </DropdownMenuItem>

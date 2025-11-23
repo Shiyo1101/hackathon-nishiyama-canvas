@@ -37,20 +37,27 @@ const animalImagesQuerySchema = z.object({
 });
 
 /**
- * 動物ルートのファクトリー関数
+ * 動物画像IDパラメータスキーマ
  */
-export const createAnimalsRoutes = () => {
-  const app = new Hono();
+const animalImageIdParamSchema = z.object({
+  id: z.string().min(1),
+});
 
-  // サービス初期化
-  const animalsRepository = createAnimalsRepository(prisma);
-  const animalsService = createAnimalsService(animalsRepository);
+// サービス初期化
+const animalsRepository = createAnimalsRepository(prisma);
+const animalsService = createAnimalsService(animalsRepository);
 
+/**
+ * 動物ルート
+ * basePath を使用してパスプレフィックスを設定し、RPC型推論を有効化
+ */
+export const animalsRoutes = new Hono()
+  .basePath("/animals")
   /**
    * GET /animals
    * 動物一覧を取得
    */
-  app.get("/", zValidator("query", animalsListQuerySchema), async (c) => {
+  .get("/", zValidator("query", animalsListQuerySchema), async (c) => {
     try {
       const query = c.req.valid("query");
       const result = await animalsService.getAnimalsList(query);
@@ -72,13 +79,12 @@ export const createAnimalsRoutes = () => {
         500,
       );
     }
-  });
-
+  })
   /**
    * GET /animals/:id
    * 動物詳細を取得
    */
-  app.get("/:id", zValidator("param", animalIdParamSchema), async (c) => {
+  .get("/:id", zValidator("param", animalIdParamSchema), async (c) => {
     try {
       const { id } = c.req.valid("param");
       const animal = await animalsService.getAnimalById(id);
@@ -113,13 +119,12 @@ export const createAnimalsRoutes = () => {
         500,
       );
     }
-  });
-
+  })
   /**
    * GET /animals/:id/images
    * 動物の画像一覧を取得
    */
-  app.get(
+  .get(
     "/:id/images",
     zValidator("param", animalIdParamSchema),
     zValidator("query", animalImagesQuerySchema),
@@ -163,7 +168,44 @@ export const createAnimalsRoutes = () => {
         );
       }
     },
-  );
+  )
+  /**
+   * GET /animals/images/:id
+   * 動物画像詳細を取得
+   */
+  .get("/images/:id", zValidator("param", animalImageIdParamSchema), async (c) => {
+    try {
+      const { id } = c.req.valid("param");
+      const image = await animalsService.getAnimalImageById(id);
 
-  return app;
-};
+      if (!image) {
+        return c.json(
+          {
+            success: false,
+            error: {
+              code: "NOT_FOUND",
+              message: "動物画像が見つかりません",
+            },
+          },
+          404,
+        );
+      }
+
+      return c.json({
+        success: true,
+        data: { image },
+      });
+    } catch (error) {
+      console.error("動物画像詳細取得エラー:", error);
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: "INTERNAL_ERROR",
+            message: "動物画像詳細の取得に失敗しました",
+          },
+        },
+        500,
+      );
+    }
+  });

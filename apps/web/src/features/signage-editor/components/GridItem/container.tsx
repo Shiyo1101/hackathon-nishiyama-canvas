@@ -10,6 +10,8 @@ type GridItemContainerProps = {
   isDragging: boolean;
   /** 削除ハンドラー */
   onDelete: () => void;
+  /** 編集ハンドラー */
+  onEdit: () => void;
   /** クリックハンドラー */
   onClick: () => void;
 };

@@ -10,6 +10,8 @@ type SignageGridContainerProps = {
   onItemsChangeAction: (items: LayoutItem[]) => void;
   /** アイテム削除時のコールバック */
   onItemDeleteAction: (itemId: string) => void;
+  /** アイテム編集時のコールバック */
+  onItemEditAction: (itemId: string) => void;
   /** アイテム選択時のコールバック */
   onItemSelectAction: (itemId: string | null) => void;
   /** 選択中のアイテムID */
@@ -17,7 +19,5 @@ type SignageGridContainerProps = {
 };
 
 export const SignageGridContainer = (props: SignageGridContainerProps): React.JSX.Element => {
-  // Container は Server Component だが、このコンポーネントは状態管理が必要なため
-  // Presentation に処理を委譲する
   return <SignageGridPresentation {...props} />;
 };

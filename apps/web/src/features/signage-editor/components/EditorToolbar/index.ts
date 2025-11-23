@@ -1,2 +1,1 @@
-export { EditorToolbar } from "./container";
-export { EditorToolbarPresentation } from "./presentation";
+export { EditorToolbarPresentation as EditorToolbar } from "./presentation";

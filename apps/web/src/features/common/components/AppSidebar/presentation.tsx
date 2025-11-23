@@ -62,19 +62,18 @@ export const AppSidebarPresentation = ({ user, props }: AppSidebarPresentationPr
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-full">
-                <AvatarImage src={user.image || ""} alt="User Avatar" />
-                <AvatarFallback className="rounded-full">
-                  {user.name?.toUpperCase().slice(0, 1) || "AD"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+            <SidebarMenuButton size="lg" asChild variant="outline">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage src={user.image || ""} alt="User Avatar" />
+                  <AvatarFallback className="rounded-lg">
+                    {user.name?.toUpperCase().slice(0, 1) || "AD"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate text-xs">{user.email}</span>
+                </div>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -24,9 +24,9 @@ enum ContentType {
   news
   animal
   text
-  image
   user_image
   weather
+  timer
 }
 
 enum UsageType {

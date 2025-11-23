@@ -1,13 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "../../../lib/db";
 import { createNewsRepository } from "../news.repository";
 import { createNewsService } from "../news.service";
 
-describe("NewsService", () => {
+describe.sequential("NewsService", () => {
   const newsRepository = createNewsRepository(prisma);
   const newsService = createNewsService(newsRepository);
 
   beforeEach(async () => {
+    await prisma.news.deleteMany();
+  });
+
+  afterEach(async () => {
     await prisma.news.deleteMany();
   });
 

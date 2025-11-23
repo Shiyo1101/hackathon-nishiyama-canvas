@@ -1,4 +1,6 @@
+import { PLAN_LIMITS } from "../../config/constants";
 import type { Signage } from "../../lib/db";
+import { ConflictError, ForbiddenError, NotFoundError } from "../../lib/errors";
 import type { SignageRepository } from "./signage.repository";
 import type { CreateSignageInput, UpdateSignageInput } from "./signage.routes";
 
@@ -19,11 +21,11 @@ const checkOwnership = async (repository: SignageRepository, userId: string, sig
   const signage = await repository.findById(signageId);
 
   if (!signage) {
-    throw new Error("サイネージが見つかりません");
+    throw new NotFoundError("サイネージが見つかりません");
   }
 
   if (signage.userId !== userId) {
-    throw new Error("このサイネージを操作する権限がありません");
+    throw new ForbiddenError("このサイネージを操作する権限がありません");
   }
 
   return signage;
@@ -37,16 +39,15 @@ export const createSignageService = (repository: SignageRepository): SignageServ
   createSignage: async (userId: string, input: CreateSignageInput): Promise<Signage> => {
     // Phase 1: 無料プランでは1ユーザー1サイネージ制限
     // TODO: Phase 2で有料プラン実装時は UserPlan テーブルを参照してlimitを動的に取得
-    const MAX_SIGNAGES_FREE_PLAN = 1;
     const signageCount = await repository.countByUserId(userId);
 
-    if (signageCount >= MAX_SIGNAGES_FREE_PLAN) {
-      throw new Error("無料プランでは1つまでサイネージを作成できます");
+    if (signageCount >= PLAN_LIMITS.FREE.MAX_SIGNAGES) {
+      throw new ConflictError("無料プランでは1つまでサイネージを作成できます");
     }
 
     const existingSlug = await repository.findBySlug(input.slug);
     if (existingSlug) {
-      throw new Error("このスラッグは既に使用されています");
+      throw new ConflictError("このスラッグは既に使用されています");
     }
 
     return repository.create(userId, input);
@@ -79,10 +80,10 @@ export const createSignageService = (repository: SignageRepository): SignageServ
     const signage = await repository.findBySlug(slug);
 
     if (!signage || !signage.isPublic) {
-      throw new Error("サイネージが見つかりません");
+      throw new NotFoundError("サイネージが見つかりません");
     }
 
-    await repository.incrementViewCount(signage.id);
+    // 閲覧数のインクリメントはハンドラー層でバックグラウンド実行
     return signage;
   },
 
@@ -97,16 +98,16 @@ export const createSignageService = (repository: SignageRepository): SignageServ
   addFavorite: async (userId: string, signageId: string): Promise<{ id: string }> => {
     const signage = await repository.findById(signageId);
     if (!signage) {
-      throw new Error("サイネージが見つかりません");
+      throw new NotFoundError("サイネージが見つかりません");
     }
 
     if (!signage.isPublic) {
-      throw new Error("非公開のサイネージはお気に入りに追加できません");
+      throw new ForbiddenError("非公開のサイネージはお気に入りに追加できません");
     }
 
     const alreadyFavorited = await repository.isFavorited(userId, signageId);
     if (alreadyFavorited) {
-      throw new Error("すでにお気に入りに追加されています");
+      throw new ConflictError("すでにお気に入りに追加されています");
     }
 
     return repository.addFavorite(userId, signageId);
@@ -115,7 +116,7 @@ export const createSignageService = (repository: SignageRepository): SignageServ
   removeFavorite: async (userId: string, signageId: string): Promise<void> => {
     const isFavorited = await repository.isFavorited(userId, signageId);
     if (!isFavorited) {
-      throw new Error("お気に入りに登録されていません");
+      throw new NotFoundError("お気に入りに登録されていません");
     }
 
     return repository.removeFavorite(userId, signageId);

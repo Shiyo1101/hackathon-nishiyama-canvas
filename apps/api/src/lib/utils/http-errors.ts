@@ -5,48 +5,39 @@
  */
 
 import { HTTPException } from "hono/http-exception";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "../errors";
 
 /**
- * エラーメッセージから適切なHTTPExceptionを生成
+ * カスタムエラーから適切なHTTPExceptionを生成
+ *
+ * instanceof による型安全なエラー判定
  */
 export const handleServiceError = (error: unknown): never => {
-  if (error instanceof Error) {
-    const message = error.message;
+  // カスタムエラークラスによる判定
+  if (error instanceof NotFoundError) {
+    throw new HTTPException(404, { message: error.message });
+  }
 
-    // 404エラー
-    if (
-      message === "サイネージが見つかりません" ||
-      message.includes("見つかりません") ||
-      message.includes("not found")
-    ) {
-      throw new HTTPException(404, { message });
-    }
+  if (error instanceof ForbiddenError) {
+    throw new HTTPException(403, { message: error.message });
+  }
 
-    // 403エラー
-    if (
-      message === "このサイネージを操作する権限がありません" ||
-      message.includes("権限がありません") ||
-      message.includes("forbidden") ||
-      message.includes("not allowed")
-    ) {
-      throw new HTTPException(403, { message });
-    }
+  if (error instanceof ConflictError) {
+    throw new HTTPException(409, { message: error.message });
+  }
 
-    // 409エラー (Conflict)
-    if (
-      message === "すでにサイネージが存在します" ||
-      message === "このスラッグは既に使用されています" ||
-      message.includes("すでに") ||
-      message.includes("already exists") ||
-      message.includes("既に使用")
-    ) {
-      throw new HTTPException(409, { message });
-    }
+  if (error instanceof ValidationError) {
+    throw new HTTPException(400, { message: error.message });
+  }
 
-    // 400エラー (Bad Request) - バリデーションエラー等
-    if (message.includes("無効") || message.includes("invalid") || message.includes("validation")) {
-      throw new HTTPException(400, { message });
-    }
+  if (error instanceof UnauthorizedError) {
+    throw new HTTPException(401, { message: error.message });
   }
 
   // その他のエラーは500エラーとして処理

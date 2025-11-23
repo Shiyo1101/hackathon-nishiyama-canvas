@@ -23,8 +23,9 @@ export type ContentItemType =
   | "news" // ニュース
   | "animal" // 動物情報
   | "text" // テキスト
-  | "image" // 公式画像
-  | "user_image"; // ユーザーアップロード画像
+  | "user_image" // ユーザーアップロード画像
+  | "weather" // 天気情報
+  | "timer"; // タイマー
 
 /**
  * レイアウトアイテム
@@ -38,14 +39,40 @@ export type LayoutItem = {
   position: GridPosition;
   /** コンテンツID (データベース上のニュースIDや画像IDなど) */
   contentId?: string;
+  /** 複数コンテンツID配列 (動物画像スライドショー用、最大3つ) */
+  contentIds?: string[];
   /** テキストコンテンツ (type="text"の場合) */
   textContent?: string;
+  /** 背景画像URL (type="timer"の場合、動物画像のURL) */
+  backgroundImageUrl?: string;
+  /** 自動更新フラグ (type="news"の場合、1時間ごとにポーリング) */
+  autoRefresh?: boolean;
+  /** スライドショー切り替え間隔 (ミリ秒、デフォルト: 5000) */
+  slideshowInterval?: number;
   /** スタイル設定 */
   style?: {
     fontSize?: string;
     fontWeight?: string;
     color?: string;
     backgroundColor?: string;
+    /** テキスト位置(横方向) */
+    textAlign?: "left" | "center" | "right";
+    /** テキスト位置(縦方向) */
+    verticalAlign?: "top" | "center" | "bottom";
+    /** 回転角度(度) */
+    rotation?: number;
+    /** 行の高さ */
+    lineHeight?: string;
+    /** 文字間隔 */
+    letterSpacing?: string;
+    /** タイマー専用: 時刻表示形式 */
+    format?: "24h" | "12h";
+    /** タイマー専用: 秒の表示有無 */
+    showSeconds?: boolean;
+    /** タイマー専用: グラデーションオーバーレイの有効/無効 (デフォルト: true) */
+    overlayEnabled?: boolean;
+    /** タイマー専用: グラデーションオーバーレイのカラー (HEXまたはRGB(A)形式、デフォルト: #000000) */
+    overlayColor?: string;
   };
 };
 

@@ -21,21 +21,21 @@ const newsIdParamSchema = z.object({
   id: z.string().min(1),
 });
 
+// サービス初期化
+const newsRepository = createNewsRepository(prisma);
+const newsService = createNewsService(newsRepository);
+
 /**
- * ニュースルートのファクトリー関数
+ * ニュースルート
+ * basePath を使用してパスプレフィックスを設定し、RPC型推論を有効化
  */
-export const createNewsRoutes = () => {
-  const app = new Hono();
-
-  // サービス初期化
-  const newsRepository = createNewsRepository(prisma);
-  const newsService = createNewsService(newsRepository);
-
+export const newsRoutes = new Hono()
+  .basePath("/news")
   /**
    * GET /news
    * ニュース一覧を取得
    */
-  app.get("/", zValidator("query", newsListQuerySchema), async (c) => {
+  .get("/", zValidator("query", newsListQuerySchema), async (c) => {
     try {
       const query = c.req.valid("query");
 
@@ -58,13 +58,12 @@ export const createNewsRoutes = () => {
         500,
       );
     }
-  });
-
+  })
   /**
    * GET /news/:id
    * ニュース詳細を取得
    */
-  app.get("/:id", zValidator("param", newsIdParamSchema), async (c) => {
+  .get("/:id", zValidator("param", newsIdParamSchema), async (c) => {
     try {
       const { id } = c.req.valid("param");
 
@@ -101,6 +100,3 @@ export const createNewsRoutes = () => {
       );
     }
   });
-
-  return app;
-};

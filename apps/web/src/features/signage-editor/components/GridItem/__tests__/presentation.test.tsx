@@ -26,6 +26,7 @@ describe("GridItemPresentation", () => {
     isSelected: false,
     isDragging: false,
     onDelete: vi.fn(),
+    onEdit: vi.fn(),
     onClick: vi.fn(),
   };
 
@@ -62,13 +63,28 @@ describe("GridItemPresentation", () => {
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
+  it("編集ボタンをクリックするとonEditが呼ばれる", async () => {
+    const user = userEvent.setup();
+    const onEdit = vi.fn();
+
+    render(<GridItemPresentation {...defaultProps} onEdit={onEdit} />);
+
+    const editButton = screen.getByRole("button", { name: "編集" });
+    await user.click(editButton);
+
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
   it("アイテムをクリックするとonClickが呼ばれる", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
 
-    render(<GridItemPresentation {...defaultProps} onClick={onClick} />);
+    const { container } = render(<GridItemPresentation {...defaultProps} onClick={onClick} />);
 
-    const itemElement = screen.getByRole("button", { name: /ニュース/ });
+    // 外側のdiv要素をクリック（最初のdiv要素）
+    const itemElement = container.querySelector('div[role="button"]');
+    if (!itemElement) throw new Error("Item element not found");
+
     await user.click(itemElement);
 
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -100,11 +116,6 @@ describe("GridItemPresentation", () => {
     it("textタイプの場合", () => {
       render(<GridItemPresentation {...defaultProps} item={{ ...mockItem, type: "text" }} />);
       expect(screen.getByText("テキスト")).toBeInTheDocument();
-    });
-
-    it("imageタイプの場合", () => {
-      render(<GridItemPresentation {...defaultProps} item={{ ...mockItem, type: "image" }} />);
-      expect(screen.getByText("画像")).toBeInTheDocument();
     });
 
     it("user_imageタイプの場合", () => {

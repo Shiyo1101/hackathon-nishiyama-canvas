@@ -3,14 +3,17 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  EditIcon,
   FileTextIcon,
-  ImageIcon,
   Newspaper,
   PawPrintIcon,
   Trash2Icon,
   TypeIcon,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { LayoutItem } from "@/types";
 
 type GridItemPresentationProps = {
@@ -22,6 +25,8 @@ type GridItemPresentationProps = {
   isDragging: boolean;
   /** 削除ハンドラー */
   onDelete: () => void;
+  /** 編集ハンドラー */
+  onEdit: () => void;
   /** クリックハンドラー */
   onClick: () => void;
 };
@@ -39,8 +44,6 @@ const getIconForType = (type: LayoutItem["type"]): React.JSX.Element => {
       return <PawPrintIcon {...iconProps} />;
     case "text":
       return <TypeIcon {...iconProps} />;
-    case "image":
-      return <ImageIcon {...iconProps} />;
     case "user_image":
       return <FileTextIcon {...iconProps} />;
     default:
@@ -59,8 +62,6 @@ const getLabelForType = (type: LayoutItem["type"]): string => {
       return "動物情報";
     case "text":
       return "テキスト";
-    case "image":
-      return "画像";
     case "user_image":
       return "ユーザー画像";
     default:
@@ -73,72 +74,91 @@ export const GridItemPresentation = ({
   isSelected,
   isDragging,
   onDelete,
+  onEdit,
   onClick,
 }: GridItemPresentationProps): React.JSX.Element => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: item.id,
   });
 
-  const style: React.CSSProperties = {
+  const gridStyle: React.CSSProperties = {
     gridColumn: `${item.position.x + 1} / span ${item.position.w}`,
     gridRow: `${item.position.y + 1} / span ${item.position.h}`,
     transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : 1,
-    cursor: "move",
-    border: isSelected ? "2px solid #3b82f6" : "1px solid #d1d5db",
-    borderRadius: "4px",
-    backgroundColor: "#ffffff",
-    padding: "12px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    position: "relative",
-    transition: "border-color 0.2s, box-shadow 0.2s",
-    boxShadow: isSelected ? "0 4px 6px -1px rgba(59, 130, 246, 0.2)" : "none",
   };
 
   return (
-    <button
+    <div
       ref={setNodeRef}
-      style={style}
+      style={gridStyle}
+      className={cn("relative cursor-move transition-all duration-200", isDragging && "opacity-50")}
       {...attributes}
       {...listeners}
-      onClick={onClick}
-      type="button"
     >
-      {/* 削除ボタン */}
-      <Button
-        variant="destructive"
-        size="icon"
-        className="absolute top-1 right-1 h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
+      <Card
+        className={cn(
+          "flex h-full flex-col items-center justify-center gap-2 p-3 transition-all duration-200",
+          isSelected
+            ? "border-2 border-primary shadow-lg ring-2 ring-primary/20"
+            : "border-border hover:border-primary/50",
+        )}
+        onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClick();
+          }
         }}
-        aria-label="削除"
+        role="button"
+        tabIndex={0}
       >
-        <Trash2Icon className="h-3 w-3" />
-      </Button>
+        {/* 削除ボタン */}
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-1 right-1 h-6 w-6"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          aria-label="削除"
+        >
+          <Trash2Icon className="h-3 w-3" />
+        </Button>
 
-      {/* アイコン */}
-      <div className="text-gray-600">{getIconForType(item.type)}</div>
+        {/* 編集ボタン */}
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute bottom-1 left-1 h-6 w-6"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          aria-label="編集"
+        >
+          <EditIcon className="h-3 w-3" />
+        </Button>
 
-      {/* ラベル */}
-      <div className="text-center font-medium text-gray-700 text-sm">
-        {getLabelForType(item.type)}
-      </div>
+        {/* アイコン */}
+        <div className="text-muted-foreground">{getIconForType(item.type)}</div>
 
-      {/* テキストコンテンツ */}
-      {item.type === "text" && item.textContent && (
-        <div className="line-clamp-2 text-center text-gray-500 text-xs">{item.textContent}</div>
-      )}
+        {/* ラベル */}
+        <div className="text-center font-medium text-foreground text-sm">
+          {getLabelForType(item.type)}
+        </div>
 
-      {/* サイズ表示 */}
-      <div className="text-gray-400 text-xs">
-        {item.position.w} × {item.position.h}
-      </div>
-    </button>
+        {/* テキストコンテンツプレビュー */}
+        {item.type === "text" && item.textContent && (
+          <div className="line-clamp-2 px-2 text-center text-muted-foreground text-xs">
+            {item.textContent}
+          </div>
+        )}
+
+        {/* サイズバッジ */}
+        <Badge variant="outline" className="text-xs">
+          {item.position.w} × {item.position.h}
+        </Badge>
+      </Card>
+    </div>
   );
 };

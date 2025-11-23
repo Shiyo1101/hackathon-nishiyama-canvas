@@ -60,6 +60,29 @@ async function main(): Promise<void> {
     console.log("✓ テストユーザーのパスワードは既に設定済みです");
   }
 
+  // 管理者ユーザーのパスワード付きアカウント作成
+  const existingAdminAccount = await prisma.account.findFirst({
+    where: {
+      userId: admin.id,
+      providerId: "credential",
+    },
+  });
+
+  if (!existingAdminAccount) {
+    const hashedAdminPassword = await hashPassword("adminpassword");
+    await prisma.account.create({
+      data: {
+        userId: admin.id,
+        accountId: admin.id,
+        providerId: "credential",
+        password: hashedAdminPassword,
+      },
+    });
+    console.log("✓ 管理者ユーザーのパスワードを設定しました");
+  } else {
+    console.log("✓ 管理者ユーザーのパスワードは既に設定済みです");
+  }
+
   // デフォルトテーマ作成
   const defaultTheme = await prisma.theme.upsert({
     where: { id: "00000000-0000-0000-0000-000000000001" },

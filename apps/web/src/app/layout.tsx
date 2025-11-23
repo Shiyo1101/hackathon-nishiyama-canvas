@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Fira_Code, Lora, Nunito } from "next/font/google";
+import { Fira_Code, Nunito } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -8,16 +10,11 @@ const nunito = Nunito({
   display: "swap",
 });
 
-const lora = Lora({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-});
-
 const firaCode = Fira_Code({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -32,8 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${nunito.variable} ${lora.variable} ${firaCode.variable}`}>
-      <body className={`${nunito.className} antialiased`}>{children}</body>
+    <html lang="ja" className={`${nunito.variable} ${firaCode.variable}`}>
+      <body className={`${nunito.className} antialiased`}>
+        <QueryProvider>{children}</QueryProvider>
+        <Toaster closeButton richColors />
+      </body>
     </html>
   );
 }

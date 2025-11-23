@@ -40,6 +40,11 @@ export const isPublicAtom = atom<boolean>(false);
 export const signageSlugAtom = atom<string>("");
 
 /**
+ * サイネージのサムネイル画像URL
+ */
+export const thumbnailUrlAtom = atom<string | null>(null);
+
+/**
  * 保存中フラグ
  */
 export const isSavingAtom = atom<boolean>(false);
@@ -48,6 +53,27 @@ export const isSavingAtom = atom<boolean>(false);
  * エラーメッセージ
  */
 export const errorMessageAtom = atom<string | null>(null);
+
+/**
+ * 変更追跡用：初期レイアウト設定を保持
+ */
+export const initialLayoutConfigAtom = atom<LayoutConfig | null>(null);
+
+/**
+ * 未保存の変更があるかを判定する派生Atom
+ */
+export const hasUnsavedChangesAtom = atom<boolean>((get) => {
+  const currentLayout = get(layoutConfigAtom);
+  const initialLayout = get(initialLayoutConfigAtom);
+
+  // どちらかがnullの場合は変更なしとみなす
+  if (!currentLayout || !initialLayout) {
+    return false;
+  }
+
+  // JSONとして比較（深い等価性チェック）
+  return JSON.stringify(currentLayout) !== JSON.stringify(initialLayout);
+});
 
 /**
  * レイアウトアイテムの読み取り専用Atom
@@ -113,3 +139,8 @@ export const selectedItemAtom = atom<LayoutItem | null>((get) => {
   const items = get(layoutItemsAtom);
   return items.find((item) => item.id === selectedId) ?? null;
 });
+
+/**
+ * 編集モーダルを開くべきアイテムID（トリガー用）
+ */
+export const pendingEditItemIdAtom = atom<string | null>(null);

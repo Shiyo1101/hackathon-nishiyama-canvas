@@ -6,4 +6,3 @@
  */
 
 export * from "./signage";
-export * from "./templates";

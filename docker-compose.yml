@@ -17,6 +17,28 @@ services:
       timeout: 5s
       retries: 5
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: nishiyama-canvas-localstack
+    restart: unless-stopped
+    environment:
+      SERVICES: s3
+      DEBUG: 0
+      AWS_DEFAULT_REGION: ap-northeast-1
+      EDGE_PORT: 4566
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
+    driver: local
+  localstack_data:
     driver: local

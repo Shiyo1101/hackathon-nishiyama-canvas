@@ -6,6 +6,7 @@
 import type { Context } from "hono";
 import type { Signage } from "../../lib/db";
 import type { AuthenticatedVariables } from "../auth";
+import type { SignageRepository } from "./signage.repository";
 import type { SignageService } from "./signage.service";
 
 /**
@@ -42,7 +43,10 @@ const handleError = (error: unknown, c: Context) => {
 /**
  * ハンドラーファクトリー
  */
-export const createSignageHandlers = (signageService: SignageService) => ({
+export const createSignageHandlers = (
+  signageService: SignageService,
+  signageRepository: SignageRepository,
+) => ({
   /**
    * GET /signages/me - 自分のサイネージを取得
    */
@@ -143,6 +147,15 @@ export const createSignageHandlers = (signageService: SignageService) => ({
     const slug = c.req.param("slug");
     try {
       const signage = await signageService.getPublicSignage(slug);
+
+      // 閲覧数のインクリメントをバックグラウンドで実行（レスポンスをブロックしない）
+      // executionCtxがある場合（Cloudflare Workers等）はwaitUntilを使用
+      // ない場合は単にPromiseを起動して待たない
+      const incrementPromise = signageRepository.incrementViewCount(signage.id);
+      if (c.executionCtx?.waitUntil) {
+        c.executionCtx.waitUntil(incrementPromise);
+      }
+
       const serializedSignage = serializeSignage(signage);
       if (!serializedSignage) {
         throw new Error("Failed to serialize signage");

@@ -57,16 +57,16 @@ export const TemplateSelectorPresentation = ({
             テンプレートを選択
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
+        <DialogContent className="flex max-h-[85vh] max-w-4xl flex-col overflow-hidden">
+          <DialogHeader className="shrink-0">
             <DialogTitle>テンプレートを選択</DialogTitle>
             <DialogDescription>
               サイネージのレイアウトテンプレートを選択してください
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="h-[500px] pr-4">
-            <div className="grid grid-cols-2 gap-4">
+          <ScrollArea className="min-h-0 flex-1 pr-4">
+            <div className="grid grid-cols-2 gap-4 pb-4">
               {templates.map((template) => (
                 <Card
                   key={template.id}
@@ -87,7 +87,7 @@ export const TemplateSelectorPresentation = ({
                     <CardDescription>{template.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="relative aspect-16/9 w-full overflow-hidden rounded-md bg-gray-100">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-md bg-gray-100">
                       <Image
                         src={template.thumbnailUrl}
                         alt={template.name}
@@ -141,15 +141,15 @@ export const TemplateSelectorPresentation = ({
       {/* プレビューダイアログ */}
       {previewTemplate && (
         <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
+          <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col overflow-hidden">
+            <DialogHeader className="shrink-0">
               <DialogTitle>{previewTemplate.name}</DialogTitle>
               <DialogDescription>{previewTemplate.description}</DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto py-4">
               {/* サムネイル */}
-              <div className="relative aspect-16/9 w-full overflow-hidden rounded-md bg-gray-100">
+              <div className="relative aspect-video w-full overflow-hidden rounded-md bg-gray-100">
                 <Image
                   src={previewTemplate.thumbnailUrl}
                   alt={previewTemplate.name}
@@ -178,27 +178,23 @@ export const TemplateSelectorPresentation = ({
                   </li>
                 </ul>
               </div>
+            </div>
 
-              {/* アクションボタン */}
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setPreviewTemplate(null)}
-                >
-                  閉じる
-                </Button>
-                <Button
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => {
-                    handleSelectTemplate(previewTemplate);
-                    setPreviewTemplate(null);
-                  }}
-                >
-                  このテンプレートを使用
-                </Button>
-              </div>
+            {/* アクションボタン */}
+            <div className="flex shrink-0 gap-2 border-t pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setPreviewTemplate(null)}>
+                閉じる
+              </Button>
+              <Button
+                variant="default"
+                className="flex-1"
+                onClick={() => {
+                  handleSelectTemplate(previewTemplate);
+                  setPreviewTemplate(null);
+                }}
+              >
+                このテンプレートを使用
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

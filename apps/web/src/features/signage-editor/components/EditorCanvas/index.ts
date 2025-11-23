@@ -1,2 +1,1 @@
-export { EditorCanvas } from "./container";
-export { EditorCanvasPresentation } from "./presentation";
+export { EditorCanvasPresentation as EditorCanvas } from "./presentation";

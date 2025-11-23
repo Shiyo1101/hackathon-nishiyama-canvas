@@ -24,6 +24,8 @@ export const updateSignageAction = async (
     title?: string;
     description?: string;
     layoutConfig?: LayoutConfig;
+    thumbnailUrl?: string;
+    isPublic?: boolean;
   },
 ): Promise<{ success: true; signage: SerializedSignage } | { success: false; error: string }> => {
   try {
@@ -31,18 +33,15 @@ export const updateSignageAction = async (
     const headersList = await headers();
 
     // 通常のfetch APIを使用（Hono RPCの型推論の制限を回避）
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/signages/${signageId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          cookie: headersList.get("cookie") ?? "",
-        },
-        credentials: "include",
-        body: JSON.stringify(updateData),
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signages/${signageId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: headersList.get("cookie") ?? "",
       },
-    );
+      credentials: "include",
+      body: JSON.stringify(updateData),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

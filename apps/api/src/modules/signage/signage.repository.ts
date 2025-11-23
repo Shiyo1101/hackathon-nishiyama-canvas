@@ -118,44 +118,50 @@ export const createSignageRepository = (prisma: PrismaClient): SignageRepository
   },
 
   addFavorite: async (userId: string, signageId: string): Promise<{ id: string }> => {
-    const favorite = await prisma.favorite.create({
-      data: {
-        userId,
-        signageId,
-      },
-    });
-
-    // お気に入り数をインクリメント
-    await prisma.signage.update({
-      where: { id: signageId },
-      data: {
-        likeCount: {
-          increment: 1,
-        },
-      },
-    });
-
-    return { id: favorite.id };
-  },
-
-  removeFavorite: async (userId: string, signageId: string): Promise<void> => {
-    await prisma.favorite.delete({
-      where: {
-        userId_signageId: {
+    // トランザクションを使用してアトミックな操作を保証
+    return prisma.$transaction(async (tx) => {
+      const favorite = await tx.favorite.create({
+        data: {
           userId,
           signageId,
         },
-      },
-    });
+      });
 
-    // お気に入り数をデクリメント
-    await prisma.signage.update({
-      where: { id: signageId },
-      data: {
-        likeCount: {
-          decrement: 1,
+      // お気に入り数をインクリメント
+      await tx.signage.update({
+        where: { id: signageId },
+        data: {
+          likeCount: {
+            increment: 1,
+          },
         },
-      },
+      });
+
+      return { id: favorite.id };
+    });
+  },
+
+  removeFavorite: async (userId: string, signageId: string): Promise<void> => {
+    // トランザクションを使用してアトミックな操作を保証
+    await prisma.$transaction(async (tx) => {
+      await tx.favorite.delete({
+        where: {
+          userId_signageId: {
+            userId,
+            signageId,
+          },
+        },
+      });
+
+      // お気に入り数をデクリメント
+      await tx.signage.update({
+        where: { id: signageId },
+        data: {
+          likeCount: {
+            decrement: 1,
+          },
+        },
+      });
     });
   },
 

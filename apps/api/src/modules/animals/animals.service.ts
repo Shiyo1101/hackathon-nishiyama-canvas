@@ -1,5 +1,13 @@
 import type { Animal, AnimalImage } from "../../lib/db";
-import type { AnimalFilter, AnimalImageFilter, AnimalsRepository } from "./animals.repository";
+import type {
+  AnimalFilter,
+  AnimalImageFilter,
+  AnimalsRepository,
+  CreateAnimalImageInput,
+  CreateAnimalInput,
+  UpdateAnimalImageInput,
+  UpdateAnimalInput,
+} from "./animals.repository";
 
 /**
  * 動物一覧のレスポンス型
@@ -47,6 +55,36 @@ export type AnimalsService = {
    * 動物画像詳細を取得
    */
   getAnimalImageById: (id: string) => Promise<AnimalImage | null>;
+
+  /**
+   * 動物を作成（管理者のみ）
+   */
+  createAnimal: (input: CreateAnimalInput) => Promise<Animal>;
+
+  /**
+   * 動物を更新（管理者のみ）
+   */
+  updateAnimal: (id: string, input: UpdateAnimalInput) => Promise<Animal>;
+
+  /**
+   * 動物を削除（管理者のみ）
+   */
+  deleteAnimal: (id: string) => Promise<void>;
+
+  /**
+   * 動物画像を作成（管理者のみ）
+   */
+  createAnimalImage: (input: CreateAnimalImageInput) => Promise<AnimalImage>;
+
+  /**
+   * 動物画像を更新（管理者のみ）
+   */
+  updateAnimalImage: (id: string, input: UpdateAnimalImageInput) => Promise<AnimalImage>;
+
+  /**
+   * 動物画像を削除（管理者のみ）
+   */
+  deleteAnimalImage: (id: string) => Promise<void>;
 };
 
 /**
@@ -94,5 +132,54 @@ export const createAnimalsService = (animalsRepository: AnimalsRepository): Anim
 
   getAnimalImageById: async (id: string): Promise<AnimalImage | null> => {
     return animalsRepository.findAnimalImageById(id);
+  },
+
+  createAnimal: async (input: CreateAnimalInput): Promise<Animal> => {
+    return animalsRepository.createAnimal(input);
+  },
+
+  updateAnimal: async (id: string, input: UpdateAnimalInput): Promise<Animal> => {
+    const existingAnimal = await animalsRepository.findAnimalById(id);
+    if (!existingAnimal) {
+      throw new Error("動物が見つかりません");
+    }
+
+    return animalsRepository.updateAnimal(id, input);
+  },
+
+  deleteAnimal: async (id: string): Promise<void> => {
+    const existingAnimal = await animalsRepository.findAnimalById(id);
+    if (!existingAnimal) {
+      throw new Error("動物が見つかりません");
+    }
+
+    await animalsRepository.deleteAnimal(id);
+  },
+
+  createAnimalImage: async (input: CreateAnimalImageInput): Promise<AnimalImage> => {
+    const existingAnimal = await animalsRepository.findAnimalById(input.animalId);
+    if (!existingAnimal) {
+      throw new Error("動物が見つかりません");
+    }
+
+    return animalsRepository.createAnimalImage(input);
+  },
+
+  updateAnimalImage: async (id: string, input: UpdateAnimalImageInput): Promise<AnimalImage> => {
+    const existingImage = await animalsRepository.findAnimalImageById(id);
+    if (!existingImage) {
+      throw new Error("動物画像が見つかりません");
+    }
+
+    return animalsRepository.updateAnimalImage(id, input);
+  },
+
+  deleteAnimalImage: async (id: string): Promise<void> => {
+    const existingImage = await animalsRepository.findAnimalImageById(id);
+    if (!existingImage) {
+      throw new Error("動物画像が見つかりません");
+    }
+
+    await animalsRepository.deleteAnimalImage(id);
   },
 });

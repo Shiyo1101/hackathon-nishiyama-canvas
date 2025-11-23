@@ -11,8 +11,8 @@ import { API_URL } from "./constants";
  * - 結果として、エンドポイントは http://localhost:8000/api/auth/* になる
  *
  * plugins:
- * - customSessionClient: customSessionプラグインで追加されたフィールド（roleなど）を型推論
- * - adminClient: 管理者機能
+ * - inferAdditionalFields: inferAdditionalFieldsプラグインで追加されたフィールド（roleなど）を型推論
+ * - adminClient: 管理者機能プラグイン
  */
 export const authClient = createAuthClient({
   baseURL: API_URL,

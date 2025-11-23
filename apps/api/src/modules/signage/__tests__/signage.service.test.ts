@@ -115,7 +115,7 @@ describe("SignageService", () => {
 
       // Act & Assert
       await expect(service.createSignage(testUserId, input)).rejects.toThrow(
-        "すでにサイネージが存在します",
+        "無料プランでは1つまでサイネージを作成できます",
       );
     });
 
@@ -313,7 +313,7 @@ describe("SignageService", () => {
   });
 
   describe("getPublicSignage", () => {
-    test("公開サイネージを取得して閲覧数をインクリメントできる", async () => {
+    test("公開サイネージを取得できる", async () => {
       // Arrange
       const slug = generateUniqueSlug("public-signage");
       await prisma.signage.create({
@@ -333,12 +333,10 @@ describe("SignageService", () => {
       // Assert
       expect(result).not.toBeNull();
       expect(result?.slug).toBe(slug);
+      expect(result?.isPublic).toBe(true);
 
-      // 閲覧数がインクリメントされているか確認
-      const updated = await prisma.signage.findUnique({
-        where: { slug },
-      });
-      expect(updated?.viewCount).toBe(1);
+      // Note: 閲覧数のインクリメントはハンドラー層でバックグラウンド実行されるため、
+      // サービス層のテストでは検証しない
     });
 
     test("非公開サイネージは取得できない", async () => {

@@ -1,10 +1,10 @@
 /**
  * 画像アップロードサービス
  *
- * Cloudinaryを使用した画像アップロード・削除機能を提供
+ * AWS S3を使用した画像アップロード・削除機能を提供
  */
-import type { UploadResult } from "../../lib/cloudinary";
-import { deleteImage, uploadImage } from "../../lib/cloudinary";
+import type { UploadResult } from "../../lib/s3";
+import { deleteImage, uploadImage } from "../../lib/s3";
 
 /**
  * 画像アップロード結果
@@ -55,20 +55,24 @@ export const createUploadService = (): UploadService => {
       fileName: string,
       userId: string,
     ): Promise<ImageUploadResult> => {
-      // ファイル名から拡張子を除去
-      const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+      // ファイル名から拡張子を取得
+      const extension = fileName.split(".").pop() || "jpg";
+      const timestamp = Date.now();
+      const customFileName = `${timestamp}.${extension}`;
+
+      // originalFileNameをBase64エンコードして、HTTPヘッダーで許可される文字のみにする
+      const encodedOriginalFileName = Buffer.from(fileName, "utf-8").toString("base64");
 
       // アップロードオプション
       const uploadOptions = {
-        folder: `nishiyama-canvas/users/${userId}`,
-        public_id: `${nameWithoutExt}_${Date.now()}`,
-        resource_type: "image" as const,
-        transformation: [
-          {
-            quality: "auto",
-          },
-        ],
-        tags: ["user-upload", userId],
+        folder: `users/${userId}`,
+        fileName: customFileName,
+        contentType: `image/${extension}`,
+        metadata: {
+          userId,
+          originalFileName: encodedOriginalFileName, // Base64エンコード済み
+          uploadedAt: new Date().toISOString(),
+        },
       };
 
       try {
@@ -76,28 +80,28 @@ export const createUploadService = (): UploadService => {
 
         return {
           url: result.url,
-          secureUrl: result.secure_url,
-          publicId: result.public_id,
-          width: result.width,
-          height: result.height,
-          format: result.format,
-          bytes: result.bytes,
+          secureUrl: result.url, // S3では常にHTTPSを使用
+          publicId: result.key, // S3キーをpublicIdとして使用
+          width: 0, // S3では画像サイズ情報を返さないため0に設定
+          height: 0,
+          format: extension,
+          bytes: result.size,
         };
       } catch (error) {
-        console.error("Cloudinary upload error:", error);
+        console.error("S3 upload error:", error);
         throw new Error("画像のアップロードに失敗しました");
       }
     },
 
-    deleteContentImage: async (publicId: string): Promise<void> => {
+    deleteContentImage: async (key: string): Promise<void> => {
       try {
-        const result = await deleteImage(publicId);
+        const result = await deleteImage(key);
 
         if (result.result !== "ok") {
           throw new Error(`削除に失敗しました: ${result.result}`);
         }
       } catch (error) {
-        console.error("Cloudinary delete error:", error);
+        console.error("S3 delete error:", error);
         throw new Error("画像の削除に失敗しました");
       }
     },

@@ -3,6 +3,7 @@
 import type { SocialProviderType } from "@api";
 import type { ComponentProps } from "react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { PROVIDER_CONFIGS } from "../../constants";
@@ -38,8 +39,12 @@ export const SocialLoginPresentation = ({
         provider,
         callbackURL: process.env.NEXT_PUBLIC_APP_URL,
       });
+      // 成功時はリダイレクトされるため、ここには到達しない
     } catch (error) {
       console.error("Social login failed:", error);
+      toast.error(
+        `ログインに失敗しました: ${error instanceof Error ? error.message : "不明なエラー"}`,
+      );
       setIsLoading(false);
     }
   };

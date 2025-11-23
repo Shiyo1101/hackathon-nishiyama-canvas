@@ -4,7 +4,7 @@
 
 export type { Auth, Session, SessionData, User } from "./auth.instance";
 export { auth } from "./auth.instance";
-export { authMiddleware, requireAuth } from "./auth.middleware";
+export { authMiddleware, requireAdmin, requireAuth } from "./auth.middleware";
 export type { AuthenticatedVariables, AuthVariables } from "./auth.types";
 
 /**

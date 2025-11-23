@@ -19,10 +19,12 @@ type SignageGridPresentationProps = {
   gridConfig: GridConfig;
   /** レイアウトアイテム */
   items: LayoutItem[];
-  /** アイテム更新用の Server Action (名前を ...Action にすることで client エントリのプロップ名ルールに準拠) */
+  /** アイテム更新用のコールバック  */
   onItemsChangeAction: (items: LayoutItem[]) => void;
   /** アイテム削除時のコールバック */
   onItemDeleteAction: (itemId: string) => void;
+  /** アイテム編集時のコールバック */
+  onItemEditAction: (itemId: string) => void;
   /** アイテム選択時のコールバック */
   onItemSelectAction: (itemId: string | null) => void;
   /** 選択中のアイテムID */
@@ -34,6 +36,7 @@ export const SignageGridPresentation = ({
   items,
   onItemsChangeAction,
   onItemDeleteAction,
+  onItemEditAction,
   onItemSelectAction,
   selectedItemId,
 }: SignageGridPresentationProps): React.JSX.Element => {
@@ -155,6 +158,7 @@ export const SignageGridPresentation = ({
             isSelected={selectedItemId === item.id}
             isDragging={activeId === item.id}
             onDelete={() => onItemDeleteAction(item.id)}
+            onEdit={() => onItemEditAction(item.id)}
             onClick={() => onItemSelectAction(item.id)}
           />
         ))}

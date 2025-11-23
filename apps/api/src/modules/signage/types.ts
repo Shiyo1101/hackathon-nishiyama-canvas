@@ -5,6 +5,10 @@
  */
 import type { ApiResponse } from "../../types/api";
 
+// LayoutConfig型はZodスキーマから生成されるため、signage.routesからインポート
+// 循環参照を避けるため、ここでは宣言のみ
+// 実際の型定義は signage.routes.ts の `export type LayoutConfig = z.infer<typeof LayoutConfigSchema>` を参照
+
 /**
  * シリアライズされたSignage型
  *
@@ -17,7 +21,7 @@ export type SerializedSignage = {
   title: string;
   description: string | null;
   slug: string;
-  layoutConfig: unknown; // JSONB型
+  layoutConfig: unknown; // JSONB型 - 実際はLayoutConfigだが、循環参照を避けるため一旦unknown
   isPublic: boolean;
   thumbnailUrl: string | null;
   viewCount: number;
