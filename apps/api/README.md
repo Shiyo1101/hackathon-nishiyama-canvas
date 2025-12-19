@@ -30,12 +30,12 @@ apps/api/
 │   │   │   ├── auth.types.ts     # Auth types
 │   │   │   ├── index.ts          # Module exports
 │   │   │   └── __tests__/        # Auth tests
-│   │   └── signage/              # Signage module
-│   │       ├── signage.routes.ts     # Route handlers
-│   │       ├── signage.service.ts    # Business logic
-│   │       ├── signage.repository.ts # Data access
+│   │   └── canvas/              # Canvas module
+│   │       ├── canvas.routes.ts     # Route handlers
+│   │       ├── canvas.service.ts    # Business logic
+│   │       ├── canvas.repository.ts # Data access
 │   │       ├── index.ts              # Module exports
-│   │       └── __tests__/            # Signage tests
+│   │       └── __tests__/            # Canvas tests
 │   ├── lib/                      # Shared libraries
 │   │   ├── db.ts                 # Prisma client
 │   │   ├── constants.ts          # Constants
@@ -46,10 +46,10 @@ apps/api/
 │   ├── types/                    # Type definitions
 │   │   ├── index.ts
 │   │   ├── auth.ts
-│   │   ├── signage.ts
+│   │   ├── canvas.ts
 │   │   └── validation/           # Zod schemas
 │   │       ├── index.ts
-│   │       └── signage.schema.ts
+│   │       └── canvas.schema.ts
 │   └── test/                     # Test setup
 │       └── setup.ts              # Vitest config (dotenv)
 ├── vitest.config.ts              # Vitest configuration
@@ -78,7 +78,7 @@ Database (Prisma)
 各機能は `modules/` 配下にモジュールとして整理されています:
 
 - **auth/**: 認証・認可機能
-- **signage/**: サイネージCRUD操作
+- **canvas/**: キャンバスCRUD操作
 - **news/**: ニュース管理 (予定)
 - **animals/**: 動物データ管理 (予定)
 - **admin/**: 管理者機能 (予定)
@@ -193,14 +193,14 @@ pnpm type-check
 - `POST /api/auth/sign-out` - Sign out
 - `GET /api/auth/session` - Get current session
 
-### Signages
+### Canvass
 
-- `GET /api/signages` - List user's signages
-- `POST /api/signages` - Create signage (1 per user limit)
-- `GET /api/signages/:id` - Get signage details
-- `PATCH /api/signages/:id` - Update signage
-- `DELETE /api/signages/:id` - Delete signage
-- `POST /api/signages/:id/publish` - Publish signage
+- `GET /api/canvases` - List user's canvases
+- `POST /api/canvases` - Create canvas (1 per user limit)
+- `GET /api/canvases/:id` - Get canvas details
+- `PATCH /api/canvases/:id` - Update canvas
+- `DELETE /api/canvases/:id` - Delete canvas
+- `POST /api/canvases/:id/publish` - Publish canvas
 
 ### WebSocket
 
@@ -217,7 +217,7 @@ pnpm type-check
 ```typescript
 // src/index.ts
 const app = new Hono()
-  .route('/api/signages', signageRoutes)
+  .route('/api/canvases', canvasRoutes)
   // ... other routes
 
 export type AppType = typeof app
@@ -231,7 +231,7 @@ import { hc } from 'hono/client'
 import type { AppType } from '@/apps/api/src'
 
 const client = hc<AppType>('http://localhost:8000')
-const response = await client.api.signages.$get()
+const response = await client.api.canvases.$get()
 // 型安全!
 ```
 
@@ -248,20 +248,20 @@ const response = await client.api.signages.$get()
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest'
 
-describe('SignageService', () => {
-  describe('createSignage', () => {
-    it('should create signage successfully', async () => {
+describe('CanvasService', () => {
+  describe('createCanvas', () => {
+    it('should create canvas successfully', async () => {
       // Arrange
       const input = { ... }
 
       // Act
-      const result = await service.createSignage(input)
+      const result = await service.createCanvas(input)
 
       // Assert
       expect(result).toMatchObject({ ... })
     })
 
-    it('should throw error when user already has signage', async () => {
+    it('should throw error when user already has canvas', async () => {
       // ...
     })
   })
@@ -303,16 +303,9 @@ const createUserService = (repo: UserRepository): UserService => ({ ... })
 import { createHttpError } from '@/lib/utils/http-errors'
 
 // Usage
-throw createHttpError(404, 'Signage not found')
+throw createHttpError(404, 'Canvas not found')
 throw createHttpError(403, 'Access denied')
 ```
-
-## Documentation
-
-- `docs/api-specification.md`: API仕様書
-- `docs/database-schema.md`: データベーススキーマ
-- `docs/architecture.md`: アーキテクチャ設計
-- `docs/tdd-guidelines.md`: TDD開発ガイドライン
 
 ## References
 

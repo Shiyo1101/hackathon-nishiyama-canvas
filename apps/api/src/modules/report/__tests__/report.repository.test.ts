@@ -22,7 +22,7 @@ describe("ReportRepository", () => {
   const repository = createReportRepository(prisma);
 
   let testUserId: string;
-  let testSignageId: string;
+  let testCanvasId: string;
   let testReportId: string;
 
   beforeEach(async () => {
@@ -35,22 +35,22 @@ describe("ReportRepository", () => {
     });
     testUserId = user.id;
 
-    // テストサイネージを作成
-    const signage = await prisma.signage.create({
+    // テストキャンバスを作成
+    const canvas = await prisma.canvas.create({
       data: {
         userId: testUserId,
-        title: "Test Signage",
-        slug: generateUniqueSlug("test-signage"),
+        title: "Test Canvas",
+        slug: generateUniqueSlug("test-canvas"),
         layoutConfig: {},
       },
     });
-    testSignageId = signage.id;
+    testCanvasId = canvas.id;
   });
 
   describe("create", () => {
     test("通報を作成できる", async () => {
       const input = {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "inappropriate_image" as ReportReason,
         description: "不適切な画像が含まれています",
@@ -60,7 +60,7 @@ describe("ReportRepository", () => {
 
       expect(result).toBeDefined();
       expect(result.id).toBeDefined();
-      expect(result.signageId).toBe(input.signageId);
+      expect(result.canvasId).toBe(input.canvasId);
       expect(result.reporterUserId).toBe(input.reporterUserId);
       expect(result.reason).toBe(input.reason);
       expect(result.description).toBe(input.description);
@@ -71,7 +71,7 @@ describe("ReportRepository", () => {
 
     test("descriptionなしで通報を作成できる", async () => {
       const input = {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "spam" as ReportReason,
       };
@@ -86,7 +86,7 @@ describe("ReportRepository", () => {
   describe("findById", () => {
     beforeEach(async () => {
       const report = await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "inappropriate_image" as ReportReason,
         description: "テスト通報",
@@ -99,7 +99,7 @@ describe("ReportRepository", () => {
 
       expect(result).toBeDefined();
       expect(result?.id).toBe(testReportId);
-      expect(result?.signageId).toBe(testSignageId);
+      expect(result?.canvasId).toBe(testCanvasId);
     });
 
     test("存在しないIDの場合はnullを返す", async () => {
@@ -112,7 +112,7 @@ describe("ReportRepository", () => {
   describe("findByIdWithDetails", () => {
     beforeEach(async () => {
       const report = await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "copyright" as ReportReason,
         description: "著作権侵害の疑い",
@@ -125,10 +125,10 @@ describe("ReportRepository", () => {
 
       expect(result).toBeDefined();
       expect(result?.id).toBe(testReportId);
-      expect(result?.signage).toBeDefined();
-      expect(result?.signage.title).toBe("Test Signage");
-      expect(result?.signage.user).toBeDefined();
-      expect(result?.signage.user.name).toBe("Test User");
+      expect(result?.canvas).toBeDefined();
+      expect(result?.canvas.title).toBe("Test Canvas");
+      expect(result?.canvas.user).toBeDefined();
+      expect(result?.canvas.user.name).toBe("Test User");
       expect(result?.reporterUser).toBeDefined();
       expect(result?.reporterUser.name).toBe("Test User");
     });
@@ -144,12 +144,12 @@ describe("ReportRepository", () => {
     beforeEach(async () => {
       // 複数の通報を作成
       await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "inappropriate_image" as ReportReason,
       });
       await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "spam" as ReportReason,
       });
@@ -175,16 +175,16 @@ describe("ReportRepository", () => {
       }
     });
 
-    test("signageIdでフィルタリングできる", async () => {
+    test("canvasIdでフィルタリングできる", async () => {
       const result = await repository.findMany(
-        { signageId: testSignageId },
+        { canvasId: testCanvasId },
         { limit: 10, offset: 0 },
       );
 
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThanOrEqual(2);
       for (const report of result) {
-        expect(report.signageId).toBe(testSignageId);
+        expect(report.canvasId).toBe(testCanvasId);
       }
     });
 
@@ -199,12 +199,12 @@ describe("ReportRepository", () => {
   describe("count", () => {
     beforeEach(async () => {
       await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "inappropriate_image" as ReportReason,
       });
       await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "spam" as ReportReason,
       });
@@ -237,7 +237,7 @@ describe("ReportRepository", () => {
       adminUserId = admin.id;
 
       const report = await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "inappropriate_image" as ReportReason,
       });
@@ -259,21 +259,21 @@ describe("ReportRepository", () => {
     });
   });
 
-  describe("existsByUserAndSignage", () => {
-    test("同一ユーザー・サイネージの通報が存在する場合trueを返す", async () => {
+  describe("existsByUserAndCanvas", () => {
+    test("同一ユーザー・キャンバスの通報が存在する場合trueを返す", async () => {
       await repository.create({
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reporterUserId: testUserId,
         reason: "inappropriate_image" as ReportReason,
       });
 
-      const result = await repository.existsByUserAndSignage(testUserId, testSignageId);
+      const result = await repository.existsByUserAndCanvas(testUserId, testCanvasId);
 
       expect(result).toBe(true);
     });
 
-    test("同一ユーザー・サイネージの通報が存在しない場合falseを返す", async () => {
-      const result = await repository.existsByUserAndSignage(testUserId, testSignageId);
+    test("同一ユーザー・キャンバスの通報が存在しない場合falseを返す", async () => {
+      const result = await repository.existsByUserAndCanvas(testUserId, testCanvasId);
 
       expect(result).toBe(false);
     });

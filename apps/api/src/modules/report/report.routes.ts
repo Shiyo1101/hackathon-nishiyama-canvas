@@ -15,7 +15,7 @@ import type { ReportHandlers } from "./report.handlers";
  * Zodスキーマ定義
  */
 export const CreateReportRequestSchema = z.object({
-  signageId: z.string().min(1, "サイネージIDは必須です"),
+  canvasId: z.string().min(1, "キャンバスIDは必須です"),
   reason: z.enum(["inappropriate_image", "spam", "copyright", "other"], {
     errorMap: () => ({
       message:

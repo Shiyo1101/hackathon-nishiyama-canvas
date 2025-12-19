@@ -1,0 +1,146 @@
+/**
+ * キャンバスエディターの状態管理 (Jotai Atoms)
+ */
+import { atom } from "jotai";
+import type { LayoutConfig, LayoutItem } from "@/types";
+
+/**
+ * 現在のレイアウト設定
+ */
+export const layoutConfigAtom = atom<LayoutConfig | null>(null);
+
+/**
+ * 選択中のアイテムID
+ */
+export const selectedItemIdAtom = atom<string | null>(null);
+
+/**
+ * 編集中のキャンバスID
+ */
+export const canvasIdAtom = atom<string | null>(null);
+
+/**
+ * キャンバスのタイトル
+ */
+export const canvasTitleAtom = atom<string>("");
+
+/**
+ * キャンバスの説明
+ */
+export const canvasDescriptionAtom = atom<string | null>(null);
+
+/**
+ * キャンバスの公開状態
+ */
+export const isPublicAtom = atom<boolean>(false);
+
+/**
+ * キャンバスのスラッグ
+ */
+export const canvasSlugAtom = atom<string>("");
+
+/**
+ * キャンバスのサムネイル画像URL
+ */
+export const thumbnailUrlAtom = atom<string | null>(null);
+
+/**
+ * 保存中フラグ
+ */
+export const isSavingAtom = atom<boolean>(false);
+
+/**
+ * エラーメッセージ
+ */
+export const errorMessageAtom = atom<string | null>(null);
+
+/**
+ * 変更追跡用：初期レイアウト設定を保持
+ */
+export const initialLayoutConfigAtom = atom<LayoutConfig | null>(null);
+
+/**
+ * 未保存の変更があるかを判定する派生Atom
+ */
+export const hasUnsavedChangesAtom = atom<boolean>((get) => {
+  const currentLayout = get(layoutConfigAtom);
+  const initialLayout = get(initialLayoutConfigAtom);
+
+  // どちらかがnullの場合は変更なしとみなす
+  if (!currentLayout || !initialLayout) {
+    return false;
+  }
+
+  // JSONとして比較（深い等価性チェック）
+  return JSON.stringify(currentLayout) !== JSON.stringify(initialLayout);
+});
+
+/**
+ * レイアウトアイテムの読み取り専用Atom
+ */
+export const layoutItemsAtom = atom<LayoutItem[]>((get) => {
+  const layout = get(layoutConfigAtom);
+  return layout?.items ?? [];
+});
+
+/**
+ * レイアウトアイテムを更新する書き込み専用Atom
+ */
+export const updateLayoutItemsAtom = atom(null, (get, set, items: LayoutItem[]) => {
+  const currentLayout = get(layoutConfigAtom);
+  if (currentLayout) {
+    set(layoutConfigAtom, {
+      ...currentLayout,
+      items,
+    });
+  }
+});
+
+/**
+ * アイテムを追加する書き込み専用Atom
+ */
+export const addLayoutItemAtom = atom(null, (get, set, item: LayoutItem) => {
+  const currentItems = get(layoutItemsAtom);
+  set(updateLayoutItemsAtom, [...currentItems, item]);
+});
+
+/**
+ * アイテムを削除する書き込み専用Atom
+ */
+export const removeLayoutItemAtom = atom(null, (get, set, itemId: string) => {
+  const currentItems = get(layoutItemsAtom);
+  set(
+    updateLayoutItemsAtom,
+    currentItems.filter((item) => item.id !== itemId),
+  );
+
+  const selectedId = get(selectedItemIdAtom);
+  if (selectedId === itemId) {
+    set(selectedItemIdAtom, null);
+  }
+});
+
+/**
+ * アイテムを更新する書き込み専用Atom
+ */
+export const updateLayoutItemAtom = atom(null, (get, set, updatedItem: LayoutItem) => {
+  const currentItems = get(layoutItemsAtom);
+  set(
+    updateLayoutItemsAtom,
+    currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+  );
+});
+
+/**
+ * 選択中のアイテムを取得する派生Atom
+ */
+export const selectedItemAtom = atom<LayoutItem | null>((get) => {
+  const selectedId = get(selectedItemIdAtom);
+  const items = get(layoutItemsAtom);
+  return items.find((item) => item.id === selectedId) ?? null;
+});
+
+/**
+ * 編集モーダルを開くべきアイテムID（トリガー用）
+ */
+export const pendingEditItemIdAtom = atom<string | null>(null);

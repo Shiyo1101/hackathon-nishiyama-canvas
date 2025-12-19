@@ -14,6 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavItems } from "../../constants";
 
@@ -79,6 +80,7 @@ export const AppSidebarPresentation = ({ user, props }: AppSidebarPresentationPr
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 };

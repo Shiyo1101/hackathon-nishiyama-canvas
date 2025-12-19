@@ -137,6 +137,11 @@ export const createAnimalsRepository = (prisma: PrismaClient): AnimalsRepository
 
     return prisma.animal.findMany({
       where: { status },
+      include: {
+        animalImages: {
+          orderBy: { isFeatured: "desc" },
+        },
+      },
       orderBy: { name: "asc" },
       take: limit,
       skip: offset,

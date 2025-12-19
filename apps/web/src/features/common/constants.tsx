@@ -9,8 +9,8 @@ export type NavItem = {
 
 export const NavItems: NavItem[] = [
   {
-    title: "マイサイネージ",
-    url: "/signage/me",
+    title: "マイキャンバス",
+    url: "/canvas/me",
     icon: <WallpaperIcon />,
   },
   {

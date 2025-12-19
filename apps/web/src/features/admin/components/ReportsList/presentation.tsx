@@ -73,7 +73,7 @@ export const ReportsListPresentation = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>サイネージ</TableHead>
+              <TableHead>キャンバス</TableHead>
               <TableHead>理由</TableHead>
               <TableHead>詳細</TableHead>
               <TableHead>通報者</TableHead>
@@ -100,9 +100,9 @@ export const ReportsListPresentation = ({
                 <TableRow key={report.id}>
                   <TableCell className="font-medium">
                     <div className="flex flex-col gap-1">
-                      <span>{report.signage?.title || "不明"}</span>
+                      <span>{report.canvas?.title || "不明"}</span>
                       <span className="text-muted-foreground text-xs">
-                        作成者: {report.signage?.user?.name || "不明"}
+                        作成者: {report.canvas?.user?.name || "不明"}
                       </span>
                     </div>
                   </TableCell>

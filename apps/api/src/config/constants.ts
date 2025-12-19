@@ -15,8 +15,8 @@ export const PLAN_LIMITS = {
    * 無料プラン
    */
   FREE: {
-    /** 作成可能なサイネージ数 */
-    MAX_SIGNAGES: 1,
+    /** 作成可能なキャンバス数 */
+    MAX_CANVASES: 1,
     /** ストレージ容量（MB） */
     MAX_STORAGE_MB: 100,
   },
@@ -24,8 +24,8 @@ export const PLAN_LIMITS = {
    * Proプラン（将来実装予定）
    */
   PRO: {
-    /** 作成可能なサイネージ数 */
-    MAX_SIGNAGES: 10,
+    /** 作成可能なキャンバス数 */
+    MAX_CANVASES: 10,
     /** ストレージ容量（MB） */
     MAX_STORAGE_MB: 1000,
   },
@@ -52,11 +52,11 @@ export const PAGINATION = {
 } as const;
 
 /**
- * サイネージ表示設定
+ * キャンバス表示設定
  */
-export const SIGNAGE_DISPLAY = {
-  /** 人気サイネージの表示件数 */
+export const CANVAS_DISPLAY = {
+  /** 人気キャンバスの表示件数 */
   POPULAR_LIMIT: 10,
-  /** お気に入りサイネージのデフォルト表示件数 */
+  /** お気に入りキャンバスのデフォルト表示件数 */
   FAVORITES_DEFAULT_LIMIT: 10,
 } as const;

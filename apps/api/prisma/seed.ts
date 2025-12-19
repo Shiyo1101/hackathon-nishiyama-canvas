@@ -273,15 +273,15 @@ async function main(): Promise<void> {
     console.log("✓ テストユーザー3のパスワードを設定しました");
   }
 
-  // サンプルサイネージ作成（複数のユーザー分）
-  const signageData = [
+  // サンプルキャンバス作成（複数のユーザー分）
+  const canvasData = [
     {
       userId: testUser.id,
-      title: "レッサーパンダ応援サイネージ",
+      title: "レッサーパンダ応援キャンバス",
       description: "西山動物園のかわいいレッサーパンダたちを紹介します！",
-      slug: `test-user-signage`,
+      slug: `test-user-canvas`,
       isPublic: true,
-      thumbnailUrl: "https://placehold.co/1200x630/orange/white?text=Red+Panda+Signage",
+      thumbnailUrl: "https://placehold.co/1200x630/orange/white?text=Red+Panda+Canvas",
       viewCount: 120,
       likeCount: 45,
     },
@@ -291,7 +291,7 @@ async function main(): Promise<void> {
       description: "可愛いレッサーパンダの日常をお届けします",
       slug: `popular-red-panda`,
       isPublic: true,
-      thumbnailUrl: "https://placehold.co/1200x630/brown/white?text=Popular+Signage",
+      thumbnailUrl: "https://placehold.co/1200x630/brown/white?text=Popular+Canvas",
       viewCount: 89,
       likeCount: 32,
     },
@@ -307,9 +307,9 @@ async function main(): Promise<void> {
     },
   ];
 
-  const createdSignages = [];
-  for (const data of signageData) {
-    const signage = await prisma.signage.upsert({
+  const createdCanvases = [];
+  for (const data of canvasData) {
+    const canvas = await prisma.canvas.upsert({
       where: { slug: data.slug },
       update: {},
       create: {
@@ -361,36 +361,36 @@ async function main(): Promise<void> {
         },
       },
     });
-    createdSignages.push(signage);
-    console.log("✓ サイネージを作成しました:", signage.title);
+    createdCanvases.push(canvas);
+    console.log("✓ キャンバスを作成しました:", canvas.title);
   }
 
   // お気に入りデータの作成
   const favoriteData = [
     {
       userId: testUser.id,
-      signageId: createdSignages[1].id, // testUser2のサイネージをお気に入り
+      canvasId: createdCanvases[1].id, // testUser2のキャンバスをお気に入り
     },
     {
       userId: testUser.id,
-      signageId: createdSignages[2].id, // testUser3のサイネージをお気に入り
+      canvasId: createdCanvases[2].id, // testUser3のキャンバスをお気に入り
     },
     {
       userId: testUser2.id,
-      signageId: createdSignages[0].id, // testUserのサイネージをお気に入り
+      canvasId: createdCanvases[0].id, // testUserのキャンバスをお気に入り
     },
     {
       userId: testUser3.id,
-      signageId: createdSignages[0].id, // testUserのサイネージをお気に入り
+      canvasId: createdCanvases[0].id, // testUserのキャンバスをお気に入り
     },
   ];
 
   for (const favData of favoriteData) {
     const existingFavorite = await prisma.favorite.findUnique({
       where: {
-        userId_signageId: {
+        userId_canvasId: {
           userId: favData.userId,
-          signageId: favData.signageId,
+          canvasId: favData.canvasId,
         },
       },
     });
@@ -400,8 +400,8 @@ async function main(): Promise<void> {
         data: favData,
       });
       // お気に入り追加時にlikeCountをインクリメント
-      await prisma.signage.update({
-        where: { id: favData.signageId },
+      await prisma.canvas.update({
+        where: { id: favData.canvasId },
         data: {
           likeCount: {
             increment: 1,

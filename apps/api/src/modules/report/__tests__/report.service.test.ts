@@ -24,7 +24,7 @@ describe("ReportService", () => {
   const service = createReportService(repository, prisma);
 
   let testUserId: string;
-  let testSignageId: string;
+  let testCanvasId: string;
 
   beforeEach(async () => {
     // テストユーザーを作成
@@ -36,23 +36,23 @@ describe("ReportService", () => {
     });
     testUserId = user.id;
 
-    // テストサイネージを作成（公開設定）
-    const signage = await prisma.signage.create({
+    // テストキャンバスを作成（公開設定）
+    const canvas = await prisma.canvas.create({
       data: {
         userId: testUserId,
-        title: "Test Signage",
-        slug: generateUniqueSlug("test-signage"),
+        title: "Test Canvas",
+        slug: generateUniqueSlug("test-canvas"),
         layoutConfig: {},
         isPublic: true, // 公開設定
       },
     });
-    testSignageId = signage.id;
+    testCanvasId = canvas.id;
   });
 
   describe("createReport", () => {
     test("通報を作成できる", async () => {
       const input = {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reason: "inappropriate_image" as ReportReason,
         description: "不適切な画像が含まれています",
       };
@@ -60,28 +60,28 @@ describe("ReportService", () => {
       const result = await service.createReport(testUserId, input);
 
       expect(result).toBeDefined();
-      expect(result.signageId).toBe(testSignageId);
+      expect(result.canvasId).toBe(testCanvasId);
       expect(result.reporterUserId).toBe(testUserId);
       expect(result.reason).toBe(input.reason);
       expect(result.description).toBe(input.description);
       expect(result.status).toBe("pending");
     });
 
-    test("サイネージが存在しない場合はエラー", async () => {
+    test("キャンバスが存在しない場合はエラー", async () => {
       const input = {
-        signageId: "non-existent-id",
+        canvasId: "non-existent-id",
         reason: "spam" as ReportReason,
         description: "スパムです",
       };
 
       await expect(service.createReport(testUserId, input)).rejects.toThrow(
-        "サイネージが見つかりません",
+        "キャンバスが見つかりません",
       );
     });
 
     test("重複通報の場合はエラー", async () => {
       const input = {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reason: "inappropriate_image" as ReportReason,
         description: "不適切な画像が含まれています",
       };
@@ -89,9 +89,9 @@ describe("ReportService", () => {
       // 1回目の通報
       await service.createReport(testUserId, input);
 
-      // 2回目の通報（同じユーザー・サイネージ）
+      // 2回目の通報（同じユーザー・キャンバス）
       await expect(service.createReport(testUserId, input)).rejects.toThrow(
-        "すでにこのサイネージを通報済みです",
+        "すでにこのキャンバスを通報済みです",
       );
     });
   });
@@ -99,7 +99,7 @@ describe("ReportService", () => {
   describe("getReportById", () => {
     test("通報詳細を取得できる", async () => {
       const createdReport = await service.createReport(testUserId, {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reason: "copyright" as ReportReason,
         description: "著作権侵害の疑い",
       });
@@ -108,8 +108,8 @@ describe("ReportService", () => {
 
       expect(result).toBeDefined();
       expect(result.id).toBe(createdReport.id);
-      expect(result.signage).toBeDefined();
-      expect(result.signage.title).toBe("Test Signage");
+      expect(result.canvas).toBeDefined();
+      expect(result.canvas.title).toBe("Test Canvas");
       expect(result.reporterUser).toBeDefined();
     });
 
@@ -131,12 +131,12 @@ describe("ReportService", () => {
       });
 
       await service.createReport(testUserId, {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reason: "inappropriate_image" as ReportReason,
       });
 
       await service.createReport(user2.id, {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reason: "spam" as ReportReason,
       });
     });
@@ -182,7 +182,7 @@ describe("ReportService", () => {
       adminUserId = admin.id;
 
       const report = await service.createReport(testUserId, {
-        signageId: testSignageId,
+        canvasId: testCanvasId,
         reason: "inappropriate_image" as ReportReason,
       });
       testReportId = report.id;

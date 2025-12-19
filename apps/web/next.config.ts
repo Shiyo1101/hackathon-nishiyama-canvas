@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb", // 画像アップロード用に10MBまで許容
+    },
+  },
+
   images: {
     remotePatterns: [
       {

@@ -63,7 +63,7 @@ model User {
   // Relations
   sessions        Session[]
   accounts        Account[]
-  signages        Signage[]
+  canvases        Canvas[]
   userImages      UserImage[]
   reportsMade     Report[]    @relation("ReporterUser")
   reportsReviewed Report[]    @relation("ReviewerUser")
@@ -131,7 +131,7 @@ model Verification {
   @@map("verifications")
 }
 
-model Signage {
+model Canvas {
   id           String   @id @default(cuid())
   userId       String
   title        String
@@ -147,11 +147,11 @@ model Signage {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme           Theme?           @relation(fields: [themeId], references: [id], onDelete: SetNull)
-  signageContents SignageContent[]
-  reports         Report[]
-  favorites       Favorite[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme          Theme?          @relation(fields: [themeId], references: [id], onDelete: SetNull)
+  canvasContents CanvasContent[]
+  reports        Report[]
+  favorites      Favorite[]
 
   @@index([userId])
   @@index([slug])
@@ -160,7 +160,7 @@ model Signage {
   @@index([likeCount(sort: Desc)])
   @@index([themeId])
   @@index([createdAt(sort: Desc)])
-  @@map("signages")
+  @@map("canvases")
 }
 
 model News {
@@ -175,7 +175,7 @@ model News {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  signageContents SignageContent[]
+  canvasContents CanvasContent[]
 
   @@index([publishedAt(sort: Desc)])
   @@index([category])
@@ -195,7 +195,7 @@ model Theme {
   updatedAt       DateTime  @updatedAt
 
   // Relations
-  signages Signage[]
+  canvases Canvas[]
 
   @@index([name])
   @@index([isDefault])
@@ -213,8 +213,8 @@ model Animal {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  animalImages    AnimalImage[]
-  signageContents SignageContent[]
+  animalImages   AnimalImage[]
+  canvasContents CanvasContent[]
 
   @@index([name])
   @@index([species])
@@ -231,8 +231,8 @@ model AnimalImage {
   isFeatured   Boolean  @default(false)
   createdAt    DateTime @default(now())
 
-  animal          Animal           @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  signageContents SignageContent[]
+  animal         Animal          @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  canvasContents CanvasContent[]
 
   @@index([animalId])
   @@index([isFeatured])
@@ -240,26 +240,26 @@ model AnimalImage {
   @@map("animal_images")
 }
 
-model SignageContent {
+model CanvasContent {
   id          String      @id @default(cuid())
-  signageId   String
+  canvasId    String
   contentType ContentType
   contentId   String?
   position    Int         @default(0)
   settings    Json        @default("{}")
   createdAt   DateTime    @default(now())
 
-  signage     Signage      @relation(fields: [signageId], references: [id], onDelete: Cascade)
-  news        News?        @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_news_fkey")
-  animal      Animal?      @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_animal_fkey")
-  animalImage AnimalImage? @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_animal_image_fkey")
-  userImage   UserImage?   @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "signage_contents_user_image_fkey")
+  canvas      Canvas       @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+  news        News?        @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "canvas_contents_news_fkey")
+  animal      Animal?      @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "canvas_contents_animal_fkey")
+  animalImage AnimalImage? @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "canvas_contents_animal_image_fkey")
+  userImage   UserImage?   @relation(fields: [contentId], references: [id], onDelete: SetNull, map: "canvas_contents_user_image_fkey")
 
-  @@index([signageId])
+  @@index([canvasId])
   @@index([contentType])
   @@index([contentId])
-  @@index([signageId, position])
-  @@map("signage_contents")
+  @@index([canvasId, position])
+  @@map("canvas_contents")
 }
 
 model UserImage {
@@ -272,8 +272,8 @@ model UserImage {
   usageType    UsageType
   createdAt    DateTime  @default(now())
 
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  signageContents SignageContent[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  canvasContents CanvasContent[]
 
   @@index([userId])
   @@index([usageType])
@@ -283,7 +283,7 @@ model UserImage {
 
 model Report {
   id             String       @id @default(cuid())
-  signageId      String
+  canvasId       String
   reporterUserId String
   reason         ReportReason
   description    String?
@@ -293,11 +293,11 @@ model Report {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  signage      Signage @relation(fields: [signageId], references: [id], onDelete: Cascade)
-  reporterUser User    @relation("ReporterUser", fields: [reporterUserId], references: [id], onDelete: Cascade)
-  reviewer     User?   @relation("ReviewerUser", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  canvas       Canvas @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+  reporterUser User   @relation("ReporterUser", fields: [reporterUserId], references: [id], onDelete: Cascade)
+  reviewer     User?  @relation("ReviewerUser", fields: [reviewedBy], references: [id], onDelete: SetNull)
 
-  @@index([signageId])
+  @@index([canvasId])
   @@index([reporterUserId])
   @@index([status])
   @@index([reviewedBy])
@@ -308,15 +308,15 @@ model Report {
 model Favorite {
   id        String   @id @default(cuid())
   userId    String
-  signageId String
+  canvasId  String
   createdAt DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  signage Signage @relation(fields: [signageId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  canvas Canvas @relation(fields: [canvasId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, signageId])
+  @@unique([userId, canvasId])
   @@index([userId])
-  @@index([signageId])
+  @@index([canvasId])
   @@index([createdAt(sort: Desc)])
   @@map("favorites")
 }

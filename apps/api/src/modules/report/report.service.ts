@@ -11,7 +11,7 @@ import type { ReportReason, ReportStatus } from "./types";
  * 通報作成入力（Service層）
  */
 export type CreateReportInput = {
-  signageId: string;
+  canvasId: string;
   reason: ReportReason;
   description?: string;
 };
@@ -37,25 +37,25 @@ export const createReportService = (
   prisma: PrismaClient,
 ): ReportService => ({
   createReport: async (userId: string, input: CreateReportInput): Promise<Report> => {
-    // サイネージの存在確認
-    const signage = await prisma.signage.findUnique({
-      where: { id: input.signageId },
+    // キャンバスの存在確認
+    const canvas = await prisma.canvas.findUnique({
+      where: { id: input.canvasId },
     });
 
-    if (!signage) {
-      throw new Error("サイネージが見つかりません");
+    if (!canvas) {
+      throw new Error("キャンバスが見つかりません");
     }
 
-    // 重複通報チェック（同一ユーザー・同一サイネージ）
-    const isDuplicate = await repository.existsByUserAndSignage(userId, input.signageId);
+    // 重複通報チェック（同一ユーザー・同一キャンバス）
+    const isDuplicate = await repository.existsByUserAndCanvas(userId, input.canvasId);
 
     if (isDuplicate) {
-      throw new Error("すでにこのサイネージを通報済みです");
+      throw new Error("すでにこのキャンバスを通報済みです");
     }
 
     // 通報を作成
     return repository.create({
-      signageId: input.signageId,
+      canvasId: input.canvasId,
       reporterUserId: userId,
       reason: input.reason,
       description: input.description,

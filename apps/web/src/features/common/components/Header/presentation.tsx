@@ -1,7 +1,7 @@
 "use client";
 
 import type { User } from "@api";
-import { LogOutIcon, SettingsIcon, ShieldCheckIcon } from "lucide-react";
+import { LayoutDashboardIcon, LogOutIcon, SettingsIcon, ShieldCheckIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,9 +43,10 @@ export const HeaderPresentation = ({ user }: HeaderPresentationProps) => {
         </Link>
         {user ? (
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" className="rounded-full" size="icon">
-              <Link href="/settings">
-                <SettingsIcon />
+            <Button asChild>
+              <Link href="/dashboard">
+                <LayoutDashboardIcon />
+                ダッシュボード
               </Link>
             </Button>
             <DropdownMenu>
@@ -75,6 +76,12 @@ export const HeaderPresentation = ({ user }: HeaderPresentationProps) => {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <SettingsIcon className="mr-2 h-4 w-4" />
+                    設定
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOutIcon className="mr-2 h-4 w-4" />
                   ログアウト

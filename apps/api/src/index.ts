@@ -15,6 +15,14 @@ import {
 } from "./modules/animals";
 import { auth } from "./modules/auth";
 import {
+  createCanvasHandlers,
+  createCanvasRoutes,
+  createFavoriteRoutes,
+  createPublicCanvasRoutes,
+} from "./modules/canvas";
+import { createCanvasRepository } from "./modules/canvas/canvas.repository";
+import { createCanvasService } from "./modules/canvas/canvas.service";
+import {
   createAdminNewsRoutes,
   createNewsRepository,
   createNewsService,
@@ -27,14 +35,6 @@ import {
   createReportRoutes,
   createReportService,
 } from "./modules/report";
-import {
-  createFavoriteRoutes,
-  createPublicSignageRoutes,
-  createSignageHandlers,
-  createSignageRoutes,
-} from "./modules/signage";
-import { createSignageRepository } from "./modules/signage/signage.repository";
-import { createSignageService } from "./modules/signage/signage.service";
 import { createThemeRoutes } from "./modules/theme";
 import { createUploadRoutes } from "./modules/upload";
 import { createAdminUserRoutes, createUserRepository, createUserService } from "./modules/user";
@@ -47,9 +47,9 @@ import { createWeatherRoutes } from "./modules/weather";
  */
 export * from "./modules/animals";
 export * from "./modules/auth";
+export * from "./modules/canvas";
 export * from "./modules/news";
 export * from "./modules/report";
-export * from "./modules/signage";
 export * from "./modules/upload";
 export * from "./modules/user";
 export * from "./modules/user-images";
@@ -94,9 +94,9 @@ const app = new Hono()
 /**
  * サービス初期化
  */
-const signageRepository = createSignageRepository(prisma);
-const signageService = createSignageService(signageRepository);
-const signageHandlers = createSignageHandlers(signageService, signageRepository);
+const canvasRepository = createCanvasRepository(prisma);
+const canvasService = createCanvasService(canvasRepository);
+const canvasHandlers = createCanvasHandlers(canvasService, canvasRepository);
 
 const reportRepository = createReportRepository(prisma);
 const reportService = createReportService(reportRepository, prisma);
@@ -124,9 +124,9 @@ const userService = createUserService(userRepository);
  * 注: この制約により、upload/user-imagesルートの型推論が一部失われる可能性があります。
  * 完全な型安全性が必要な場合は、全エンドポイントを直接メソッドチェーンで定義してください。
  */
-const signageRoutesInstance = createSignageRoutes(signageHandlers);
-const publicSignageRoutesInstance = createPublicSignageRoutes(signageHandlers);
-const favoriteRoutesInstance = createFavoriteRoutes(signageHandlers);
+const canvasRoutesInstance = createCanvasRoutes(canvasHandlers);
+const publicCanvasRoutesInstance = createPublicCanvasRoutes(canvasHandlers);
+const favoriteRoutesInstance = createFavoriteRoutes(canvasHandlers);
 const reportRoutesInstance = createReportRoutes(reportHandlers);
 const adminReportRoutesInstance = createAdminReportRoutes(reportHandlers);
 const adminNewsRoutesInstance = createAdminNewsRoutes(newsService);
@@ -138,7 +138,7 @@ const uploadRoutesInstance = createUploadRoutes();
 const userImagesRoutesInstance = createUserImagesRoutes();
 
 const routes = new Hono()
-  .route("/signages", signageRoutesInstance)
+  .route("/canvases", canvasRoutesInstance)
   .route("/favorites", favoriteRoutesInstance)
   .route("/reports", reportRoutesInstance)
   .route("/admin/reports", adminReportRoutesInstance)
@@ -149,7 +149,7 @@ const routes = new Hono()
   .route("/weather", weatherRoutesInstance)
   .route("/upload", uploadRoutesInstance)
   .route("/user-images", userImagesRoutesInstance)
-  .route("/public", publicSignageRoutesInstance)
+  .route("/public", publicCanvasRoutesInstance)
   // newsとanimalsはbasePath()を使用しているため、直接routeせずにマージ
   .route("", newsRoutes)
   .route("", animalsRoutes);

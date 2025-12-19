@@ -7,9 +7,9 @@ import { expect, test } from "@playwright/test";
  */
 test.describe("コンテンツ選択フロー", () => {
   test.beforeEach(async ({ page }) => {
-    // サイネージエディターページに移動
+    // キャンバスエディターページに移動
     // 注: 実際のルートに応じて変更してください
-    await page.goto("/signage/edit");
+    await page.goto("/canvas/edit");
   });
 
   test.describe("ニュース選択", () => {

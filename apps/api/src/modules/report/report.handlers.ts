@@ -30,13 +30,13 @@ const serializeReportWithDetails = (report: ReportWithDetailsResult) => {
     createdAt: report.createdAt.toISOString(),
     updatedAt: report.updatedAt.toISOString(),
     reviewedAt: report.reviewedAt?.toISOString() ?? null,
-    signage: {
-      id: report.signage.id,
-      title: report.signage.title,
-      slug: report.signage.slug,
+    canvas: {
+      id: report.canvas.id,
+      title: report.canvas.title,
+      slug: report.canvas.slug,
       user: {
-        id: report.signage.user.id,
-        name: report.signage.user.name ?? "Unknown User",
+        id: report.canvas.user.id,
+        name: report.canvas.user.name ?? "Unknown User",
       },
     },
     reporter: {
@@ -110,14 +110,14 @@ export const createReportHandlers = (reportService: ReportService) => ({
    */
   getReports: async (c: Context<{ Variables: AuthenticatedVariables }>) => {
     const status = c.req.query("status");
-    const signageId = c.req.query("signageId");
+    const canvasId = c.req.query("canvasId");
     const limit = Number.parseInt(c.req.query("limit") ?? "20", 10);
     const offset = Number.parseInt(c.req.query("offset") ?? "0", 10);
 
     try {
       const filter = {
         ...(status && { status: status as "pending" | "reviewed" | "resolved" | "rejected" }),
-        ...(signageId && { signageId }),
+        ...(canvasId && { canvasId }),
       };
 
       const result = await reportService.getReports(filter, { limit, offset });

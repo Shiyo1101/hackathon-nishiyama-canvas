@@ -1,6 +1,6 @@
 # 🎨 Nishiyama Canvas - Frontend (Web)
 
-Next.js 15 + TypeScript で構築されたデジタルサイネージ作成・管理アプリケーションのフロントエンドです。
+Next.js 15 + TypeScript で構築されたデジタルキャンバス作成・管理アプリケーションのフロントエンドです。
 
 ## 📦 技術スタック
 
@@ -172,27 +172,27 @@ export default function Header() {
 標準のFetch APIを使ったデータフェッチの例：
 
 ```typescript
-// src/lib/api/signage.ts
-import type { Signage, CreateSignageInput } from "@nishiyama-canvas/shared";
+// src/lib/api/canvas.ts
+import type { Canvas, CreateCanvasInput } from "@nishiyama-canvas/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-// GET: サイネージ一覧取得
-export async function fetchSignages(): Promise<Signage[]> {
-  const res = await fetch(`${API_URL}/api/signages`, {
+// GET: キャンバス一覧取得
+export async function fetchCanvass(): Promise<Canvas[]> {
+  const res = await fetch(`${API_URL}/api/canvases`, {
     credentials: "include", // Cookie送信
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch signages: ${res.statusText}`);
+    throw new Error(`Failed to fetch canvases: ${res.statusText}`);
   }
 
   return res.json();
 }
 
-// POST: サイネージ作成
-export async function createSignage(data: CreateSignageInput): Promise<Signage> {
-  const res = await fetch(`${API_URL}/api/signages`, {
+// POST: キャンバス作成
+export async function createCanvas(data: CreateCanvasInput): Promise<Canvas> {
+  const res = await fetch(`${API_URL}/api/canvases`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -200,31 +200,31 @@ export async function createSignage(data: CreateSignageInput): Promise<Signage> 
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to create signage: ${res.statusText}`);
+    throw new Error(`Failed to create canvas: ${res.statusText}`);
   }
 
   return res.json();
 }
 
-// GET: 特定のサイネージ取得
-export async function fetchSignageById(id: string): Promise<Signage> {
-  const res = await fetch(`${API_URL}/api/signages/${id}`, {
+// GET: 特定のキャンバス取得
+export async function fetchCanvasById(id: string): Promise<Canvas> {
+  const res = await fetch(`${API_URL}/api/canvases/${id}`, {
     credentials: "include",
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch signage: ${res.statusText}`);
+    throw new Error(`Failed to fetch canvas: ${res.statusText}`);
   }
 
   return res.json();
 }
 
-// PUT: サイネージ更新
-export async function updateSignage(
+// PUT: キャンバス更新
+export async function updateCanvas(
   id: string,
-  data: Partial<CreateSignageInput>,
-): Promise<Signage> {
-  const res = await fetch(`${API_URL}/api/signages/${id}`, {
+  data: Partial<CreateCanvasInput>,
+): Promise<Canvas> {
+  const res = await fetch(`${API_URL}/api/canvases/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -232,21 +232,21 @@ export async function updateSignage(
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to update signage: ${res.statusText}`);
+    throw new Error(`Failed to update canvas: ${res.statusText}`);
   }
 
   return res.json();
 }
 
-// DELETE: サイネージ削除
-export async function deleteSignage(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/signages/${id}`, {
+// DELETE: キャンバス削除
+export async function deleteCanvas(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/canvases/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to delete signage: ${res.statusText}`);
+    throw new Error(`Failed to delete canvas: ${res.statusText}`);
   }
 }
 ```
@@ -258,44 +258,44 @@ Next.js 15のApp Routerでは、拡張されたFetch APIを使ってキャッシ
 #### Server Componentsでのデータフェッチ（キャッシュ有効）
 
 ```typescript
-// src/app/signages/[id]/page.tsx
-import type { Signage } from "@nishiyama-canvas/shared";
+// src/app/canvases/[id]/page.tsx
+import type { Canvas } from "@nishiyama-canvas/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Server Componentでデータフェッチ（自動キャッシュ）
-async function fetchSignage(id: string): Promise<Signage> {
-  const res = await fetch(`${API_URL}/api/signages/${id}`, {
+async function fetchCanvas(id: string): Promise<Canvas> {
+  const res = await fetch(`${API_URL}/api/canvases/${id}`, {
     // デフォルト: { cache: "force-cache" }
     // 60秒ごとにRevalidate
     next: { revalidate: 60 },
   });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch signage");
+    throw new Error("Failed to fetch canvas");
   }
 
   return res.json();
 }
 
-export default async function SignagePage({ params }: { params: { id: string } }) {
-  const signage = await fetchSignage(params.id);
+export default async function CanvasPage({ params }: { params: { id: string } }) {
+  const canvas = await fetchCanvas(params.id);
 
   return (
     <div>
-      <h1>{signage.title}</h1>
-      <p>{signage.description}</p>
+      <h1>{canvas.title}</h1>
+      <p>{canvas.description}</p>
     </div>
   );
 }
 
 // 静的パラメータ生成（SSG）
 export async function generateStaticParams() {
-  const res = await fetch(`${API_URL}/api/signages`);
-  const signages: Signage[] = await res.json();
+  const res = await fetch(`${API_URL}/api/canvases`);
+  const canvases: Canvas[] = await res.json();
 
-  return signages.map((signage) => ({
-    id: signage.id,
+  return canvases.map((canvas) => ({
+    id: canvas.id,
   }));
 }
 ```
@@ -313,61 +313,61 @@ fetch(url, { cache: "no-store" });
 fetch(url, { next: { revalidate: 60 } });
 
 // タグベースのRevalidation
-fetch(url, { next: { tags: ["signages"] } });
+fetch(url, { next: { tags: ["canvases"] } });
 ```
 
 #### Server Actionsでの更新・Revalidation
 
 ```typescript
-// src/app/actions/signage.ts
+// src/app/actions/canvas.ts
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import type { CreateSignageInput } from "@nishiyama-canvas/shared";
+import type { CreateCanvasInput } from "@nishiyama-canvas/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export async function createSignageAction(data: CreateSignageInput) {
-  const res = await fetch(`${API_URL}/api/signages`, {
+export async function createCanvasAction(data: CreateCanvasInput) {
+  const res = await fetch(`${API_URL}/api/canvases`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
   if (!res.ok) {
-    throw new Error("Failed to create signage");
+    throw new Error("Failed to create canvas");
   }
 
-  const signage = await res.json();
+  const canvas = await res.json();
 
   // パスベースのRevalidation
-  revalidatePath("/signages");
-  revalidatePath(`/signages/${signage.id}`);
+  revalidatePath("/canvases");
+  revalidatePath(`/canvases/${canvas.id}`);
 
   // または、タグベースのRevalidation
-  revalidateTag("signages");
+  revalidateTag("canvases");
 
-  return signage;
+  return canvas;
 }
 ```
 
 #### Client Componentでのデータフェッチ
 
 ```typescript
-// src/components/SignageList.tsx
+// src/components/CanvasList.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Signage } from "@nishiyama-canvas/shared";
-import { fetchSignages } from "@/lib/api/signage";
+import type { Canvas } from "@nishiyama-canvas/shared";
+import { fetchCanvass } from "@/lib/api/canvas";
 
-export function SignageList() {
-  const [signages, setSignages] = useState<Signage[]>([]);
+export function CanvasList() {
+  const [canvases, setCanvass] = useState<Canvas[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSignages()
-      .then(setSignages)
+    fetchCanvass()
+      .then(setCanvass)
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -376,8 +376,8 @@ export function SignageList() {
 
   return (
     <ul>
-      {signages.map((signage) => (
-        <li key={signage.id}>{signage.title}</li>
+      {canvases.map((canvas) => (
+        <li key={canvas.id}>{canvas.title}</li>
       ))}
     </ul>
   );
@@ -387,26 +387,26 @@ export function SignageList() {
 #### Streaming SSR（Suspense境界）
 
 ```tsx
-// src/app/signages/page.tsx
+// src/app/canvases/page.tsx
 import { Suspense } from "react";
 
-async function SignageList() {
-  const signages = await fetchSignages();
+async function CanvasList() {
+  const canvases = await fetchCanvass();
   return (
     <ul>
-      {signages.map((s) => (
+      {canvases.map((s) => (
         <li key={s.id}>{s.title}</li>
       ))}
     </ul>
   );
 }
 
-export default function SignagesPage() {
+export default function CanvassPage() {
   return (
     <div>
-      <h1>サイネージ一覧</h1>
+      <h1>キャンバス一覧</h1>
       <Suspense fallback={<div>読み込み中...</div>}>
-        <SignageList />
+        <CanvasList />
       </Suspense>
     </div>
   );
@@ -416,30 +416,30 @@ export default function SignagesPage() {
 ## 📝 フォーム処理（React Hook Form + Zod）
 
 ```typescript
-// src/lib/validation/signage.ts
+// src/lib/validation/canvas.ts
 import { z } from "zod";
 
-export const createSignageSchema = z.object({
+export const createCanvasSchema = z.object({
   title: z.string().min(1, "タイトルは必須です").max(100),
   description: z.string().max(500).optional(),
   isPublic: z.boolean().default(false),
 });
 
-export type CreateSignageInput = z.infer<typeof createSignageSchema>;
+export type CreateCanvasInput = z.infer<typeof createCanvasSchema>;
 ```
 
 ```tsx
-// src/components/SignageForm.tsx
+// src/components/CanvasForm.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createSignageSchema, type CreateSignageInput } from "@/lib/validation/signage";
+import { createCanvasSchema, type CreateCanvasInput } from "@/lib/validation/canvas";
 
-export default function SignageForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateSignageInput>({
-    resolver: zodResolver(createSignageSchema),
+export default function CanvasForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm<CreateCanvasInput>({
+    resolver: zodResolver(createCanvasSchema),
   });
 
-  const onSubmit = (data: CreateSignageInput) => {
+  const onSubmit = (data: CreateCanvasInput) => {
     console.log(data);
   };
 
@@ -455,7 +455,7 @@ export default function SignageForm() {
 
 ## 🎯 ドラッグ&ドロップ（@dnd-kit）
 
-サイネージエディタでのドラッグ&ドロップ実装例：
+キャンバスエディタでのドラッグ&ドロップ実装例：
 
 ```tsx
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
@@ -506,11 +506,11 @@ socket.disconnect();
 ```
 
 ```tsx
-// src/components/SignageViewer.tsx
+// src/components/CanvasViewer.tsx
 import { useEffect } from "react";
 import { socket } from "@/lib/socket";
 
-export default function SignageViewer({ signageId }: { signageId: string }) {
+export default function CanvasViewer({ canvasId }: { canvasId: string }) {
   useEffect(() => {
     socket.connect();
 
@@ -522,9 +522,9 @@ export default function SignageViewer({ signageId }: { signageId: string }) {
     return () => {
       socket.disconnect();
     };
-  }, [signageId]);
+  }, [canvasId]);
 
-  return <div>サイネージビューアー</div>;
+  return <div>キャンバスビューアー</div>;
 }
 ```
 
@@ -549,15 +549,15 @@ describe("Button", () => {
 ### E2Eテスト（Playwright）
 
 ```typescript
-// e2e/signage.spec.ts
+// e2e/canvas.spec.ts
 import { test, expect } from "@playwright/test";
 
-test("サイネージを作成できる", async ({ page }) => {
+test("キャンバスを作成できる", async ({ page }) => {
   await page.goto("http://localhost:3000");
-  await page.click('text="サイネージ作成"');
-  await page.fill('input[name="title"]', "テストサイネージ");
+  await page.click('text="キャンバス作成"');
+  await page.fill('input[name="title"]', "テストキャンバス");
   await page.click('button[type="submit"]');
-  await expect(page.locator("text=テストサイネージ")).toBeVisible();
+  await expect(page.locator("text=テストキャンバス")).toBeVisible();
 });
 ```
 
@@ -607,15 +607,6 @@ class UserService {
   }
 }
 ```
-
-## 🔗 関連リンク
-
-- [プロジェクトルートREADME](../../README.md) - セットアップガイド、全体構成
-- [CLAUDE.md](../../CLAUDE.md) - AI開発ガイド、プロジェクト仕様
-- [要件定義書](../../docs/requirements.md)
-- [アーキテクチャ設計書](../../docs/architecture.md)
-- [開発ガイドライン](../../docs/development-guidelines.md)
-- [TDD開発ガイドライン](../../docs/tdd-guidelines.md)
 
 ## 📚 技術ドキュメント
 

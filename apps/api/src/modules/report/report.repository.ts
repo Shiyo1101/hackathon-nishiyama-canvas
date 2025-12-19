@@ -5,7 +5,7 @@ import type { ReportReason, ReportStatus } from "./types";
  * 通報作成入力
  */
 export type CreateReportInput = {
-  signageId: string;
+  canvasId: string;
   reporterUserId: string;
   reason: ReportReason;
   description?: string;
@@ -16,7 +16,7 @@ export type CreateReportInput = {
  */
 export type ReportFilter = {
   status?: ReportStatus;
-  signageId?: string;
+  canvasId?: string;
 };
 
 /**
@@ -31,7 +31,7 @@ export type Pagination = {
  * 詳細情報を含む通報（Prismaクエリ結果）
  */
 export type ReportWithDetailsResult = Report & {
-  signage: {
+  canvas: {
     id: string;
     title: string;
     slug: string;
@@ -56,7 +56,7 @@ export type ReportRepository = {
   findMany: (filter: ReportFilter, pagination: Pagination) => Promise<ReportWithDetailsResult[]>;
   count: (filter: ReportFilter) => Promise<number>;
   updateStatus: (id: string, status: ReportStatus, reviewedBy: string) => Promise<Report>;
-  existsByUserAndSignage: (userId: string, signageId: string) => Promise<boolean>;
+  existsByUserAndCanvas: (userId: string, canvasId: string) => Promise<boolean>;
 };
 
 /**
@@ -66,7 +66,7 @@ export const createReportRepository = (prisma: PrismaClient): ReportRepository =
   create: async (input: CreateReportInput): Promise<Report> => {
     return prisma.report.create({
       data: {
-        signageId: input.signageId,
+        canvasId: input.canvasId,
         reporterUserId: input.reporterUserId,
         reason: input.reason,
         description: input.description,
@@ -84,7 +84,7 @@ export const createReportRepository = (prisma: PrismaClient): ReportRepository =
     return prisma.report.findUnique({
       where: { id },
       include: {
-        signage: {
+        canvas: {
           select: {
             id: true,
             title: true,
@@ -114,10 +114,10 @@ export const createReportRepository = (prisma: PrismaClient): ReportRepository =
     return prisma.report.findMany({
       where: {
         ...(filter.status && { status: filter.status }),
-        ...(filter.signageId && { signageId: filter.signageId }),
+        ...(filter.canvasId && { canvasId: filter.canvasId }),
       },
       include: {
-        signage: {
+        canvas: {
           select: {
             id: true,
             title: true,
@@ -149,7 +149,7 @@ export const createReportRepository = (prisma: PrismaClient): ReportRepository =
     return prisma.report.count({
       where: {
         ...(filter.status && { status: filter.status }),
-        ...(filter.signageId && { signageId: filter.signageId }),
+        ...(filter.canvasId && { canvasId: filter.canvasId }),
       },
     });
   },
@@ -165,11 +165,11 @@ export const createReportRepository = (prisma: PrismaClient): ReportRepository =
     });
   },
 
-  existsByUserAndSignage: async (userId: string, signageId: string): Promise<boolean> => {
+  existsByUserAndCanvas: async (userId: string, canvasId: string): Promise<boolean> => {
     const count = await prisma.report.count({
       where: {
         reporterUserId: userId,
-        signageId,
+        canvasId,
       },
     });
     return count > 0;

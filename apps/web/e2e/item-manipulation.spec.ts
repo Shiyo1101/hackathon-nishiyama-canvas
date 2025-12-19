@@ -7,8 +7,8 @@ import { expect, test } from "@playwright/test";
  */
 test.describe("アイテム操作", () => {
   test.beforeEach(async ({ page }) => {
-    // サイネージエディターページに移動
-    await page.goto("/signage/edit");
+    // キャンバスエディターページに移動
+    await page.goto("/canvas/edit");
 
     // テスト用にテキストアイテムを追加
     await page.getByRole("button", { name: /テキスト/ }).click();

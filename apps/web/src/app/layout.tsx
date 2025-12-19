@@ -20,7 +20,7 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   title: "にしやまきゃんばす!",
   description:
-    "福井県鯖江市「西山動物園」のレッサーパンダをテーマにしたデジタルサイネージ作成・管理アプリケーション",
+    "福井県鯖江市「西山動物園」のレッサーパンダをテーマにしたデジタルキャンバス作成・管理アプリケーション",
 };
 
 export default function RootLayout({

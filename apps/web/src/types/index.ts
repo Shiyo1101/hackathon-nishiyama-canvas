@@ -1,8 +1,8 @@
 /**
  * 型定義のエクスポート
  *
- * 注意: API関連の型（ApiResponse, SerializedSignage等）は
+ * 注意: API関連の型（ApiResponse, SerializedCanvas等）は
  * バックエンド（@api）から直接インポートしてください
  */
 
-export * from "./signage";
+export * from "./canvas";

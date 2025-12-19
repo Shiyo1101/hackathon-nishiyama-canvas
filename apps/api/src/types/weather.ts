@@ -61,7 +61,7 @@ export type WeatherIcon =
   | "50n";
 
 /**
- * サイネージ内での天気情報設定型
+ * キャンバス内での天気情報設定型
  */
 export const weatherConfigSchema = z.object({
   enabled: z.boolean(),

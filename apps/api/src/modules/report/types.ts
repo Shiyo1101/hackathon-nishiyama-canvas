@@ -20,7 +20,7 @@ export type { ReportReason, ReportStatus };
  */
 export type SerializedReport = {
   id: string;
-  signageId: string;
+  canvasId: string;
   reporterUserId: string;
   reason: ReportReason;
   description: string | null;
@@ -35,7 +35,7 @@ export type SerializedReport = {
  * 詳細情報を含むReport型（管理者用）
  */
 export type ReportWithDetails = SerializedReport & {
-  signage: {
+  canvas: {
     id: string;
     title: string;
     slug: string;

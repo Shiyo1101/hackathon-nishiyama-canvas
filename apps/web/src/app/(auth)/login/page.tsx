@@ -5,7 +5,7 @@ import { SocialLogin } from "@/features/login/components/SocialLogin";
 
 export const metadata: Metadata = {
   title: "ログイン - にしやまきゃんばす",
-  description: "西山動物園のレッサーパンダをテーマにしたデジタルサイネージ作成アプリケーション",
+  description: "西山動物園のレッサーパンダをテーマにしたデジタルキャンバス作成アプリケーション",
 };
 
 const LoginPage = () => {
