@@ -2,7 +2,7 @@
 	"name": "nishiyama-canvas",
 	"version": "0.1.0",
 	"private": true,
-	"description": "福井県鯖江市「西山動物園」のレッサーパンダをテーマにしたデジタルサイネージ作成・管理アプリケーション",
+	"description": "福井県鯖江市「西山動物園」のレッサーパンダをテーマにしたデジタルキャンバス作成・管理アプリケーション",
 	"scripts": {
 		"dev": "turbo run dev",
 		"dev:web": "turbo run dev --filter=web",
